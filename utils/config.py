@@ -2,7 +2,7 @@
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Union
+from typing import List, Optional, Union
 
 from omegaconf import MISSING, OmegaConf
 
@@ -92,6 +92,8 @@ class TrainingConfig:
     check_val_every_n_epoch: int = MISSING
     precision: int = MISSING
     detect_anomaly: bool = MISSING
+    resume_from: Optional[str] = None
+    resume_mode: str = MISSING
 
 
 @dataclass

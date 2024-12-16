@@ -74,6 +74,8 @@ training:
   check_val_every_n_epoch: 1
   precision: 32
   detect_anomaly: true
+  resume_from: null  # Path to checkpoint file or directory to resume from
+  resume_mode: "latest"  # One of ["best", "latest"] - Controls which checkpoint to load when resuming
 
 # Optimizer Configuration
 optimizer:

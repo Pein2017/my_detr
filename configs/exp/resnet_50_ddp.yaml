@@ -18,6 +18,7 @@ optimizer:
 training:
   batch_size: 8
   max_epochs: 150
+  resume_from: ${output.base_dir}/${calculated.experiment_name}  # Resume from previous run
 
 # Model Configuration
 model:

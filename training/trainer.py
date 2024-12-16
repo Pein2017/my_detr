@@ -14,6 +14,7 @@ import torch
 import torch.distributed as dist
 import torch.nn as nn
 from omegaconf import DictConfig
+from torch.nn.parallel import DistributedDataParallel
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
@@ -58,6 +59,38 @@ class MetricHandler:
         # Initialize metric buffers for interval logging
         self.metric_buffers = {}
         self.last_log_step = 0
+
+        # Store the initial global step for resuming
+        self.initial_global_step = 0
+        if writer is not None and config.training.resume_from:
+            try:
+                from tensorboard.backend.event_processing.event_accumulator import (
+                    EventAccumulator,
+                )
+
+                log_dir = str(
+                    Path(config.output.base_dir) / config.logging.tensorboard.log_dir
+                )
+                event_acc = EventAccumulator(log_dir)
+                event_acc.Reload()
+
+                # Find the last step from any scalar event
+                for tag in event_acc.Tags()["scalars"]:
+                    events = event_acc.Scalars(tag)
+                    if events:
+                        self.initial_global_step = max(
+                            self.initial_global_step, events[-1].step
+                        )
+
+                if is_main_process() and self.initial_global_step > 0:
+                    logging.info(
+                        f"Resuming metrics from global step: {self.initial_global_step}"
+                    )
+            except Exception as e:
+                if is_main_process():
+                    logging.warning(
+                        f"Could not determine last tensorboard step: {str(e)}"
+                    )
 
     def _get_prefixed_metrics(
         self, metrics: Dict[str, float], prefix: str
@@ -118,16 +151,19 @@ class MetricHandler:
         if not self.writer:
             return
 
+        # Adjust global step if resuming
+        adjusted_step = global_step + self.initial_global_step
+
         for name, value in metrics_dict.items():
             # Skip None or non-numeric values
             if value is None or not isinstance(value, (int, float)):
                 continue
 
             try:
-                self.writer.add_scalar(name, value, global_step)
+                self.writer.add_scalar(name, value, adjusted_step)
                 if is_main_process():
                     logging.debug(
-                        f"Logged to tensorboard: {name}={value:.4f} at step {global_step}"
+                        f"Logged to tensorboard: {name}={value:.4f} at step {adjusted_step}"
                     )
             except Exception as e:
                 if is_main_process():
@@ -165,7 +201,7 @@ class MetricHandler:
         if evaluator is not None:
             try:
                 predictions = prepare_predictions(
-                    outputs, targets, score_threshold=0.01
+                    outputs, targets, score_threshold=0.001
                 )
                 if predictions:
                     evaluator.update(predictions)
@@ -269,6 +305,30 @@ class CheckpointManager:
         self.config = config
         self.checkpoint_dir = output_dir / "checkpoints"
         self.checkpoint_dir.mkdir(parents=True, exist_ok=True)
+        self.top_k = config.logging.get(
+            "save_top_k", 3
+        )  # Default to keeping top 3 models
+        self.best_metrics = []  # List of (metric_value, checkpoint_path) tuples
+
+    def _cleanup_old_checkpoints(self):
+        """Remove checkpoints that are not in top-k."""
+        if not self.best_metrics:
+            return
+
+        # Keep only top-k checkpoints
+        checkpoints_to_remove = [path for _, path in self.best_metrics[self.top_k :]]
+        for checkpoint_path in checkpoints_to_remove:
+            try:
+                if os.path.exists(checkpoint_path):
+                    os.remove(checkpoint_path)
+                    logging.info(f"Removed checkpoint: {checkpoint_path}")
+            except Exception as e:
+                logging.error(
+                    f"Failed to remove checkpoint {checkpoint_path}: {str(e)}"
+                )
+
+        # Update best_metrics list to keep only top-k
+        self.best_metrics = self.best_metrics[: self.top_k]
 
     def save(
         self,
@@ -277,17 +337,11 @@ class CheckpointManager:
         model: nn.Module,
         optimizer: torch.optim.Optimizer,
         lr_scheduler: torch.optim.lr_scheduler._LRScheduler,
+        metric_value: float,
         is_best: bool = False,
     ):
         """Save training checkpoint."""
         if not is_main_process():
-            return
-
-        # Check if we should save checkpoint
-        if (
-            epoch % self.config.logging.save_checkpoint_every_n_epochs != 0
-            and not is_best
-        ):
             return
 
         checkpoint = {
@@ -297,18 +351,46 @@ class CheckpointManager:
             "optimizer_state_dict": optimizer.state_dict(),
             "lr_scheduler_state_dict": lr_scheduler.state_dict(),
             "config": self.config,
+            "metric_value": metric_value,
         }
 
-        # Save latest checkpoint
+        # Save checkpoint
         checkpoint_path = self.checkpoint_dir / f"checkpoint_epoch_{epoch}.pth"
         torch.save(checkpoint, checkpoint_path)
+
+        # Update best_metrics list
+        self.best_metrics.append((metric_value, str(checkpoint_path)))
+        self.best_metrics.sort(
+            key=lambda x: x[0]
+        )  # Sort by metric value (ascending for loss)
+
+        # Cleanup old checkpoints
+        self._cleanup_old_checkpoints()
 
         # Save best checkpoint if specified
         if is_best:
             best_path = self.checkpoint_dir / "best_model.pth"
             torch.save(checkpoint, best_path)
+            logging.info(f"Saved best model with metric value: {metric_value:.4f}")
 
-        logging.info(f"Saved checkpoint for epoch {epoch}")
+        logging.info(
+            f"Saved checkpoint for epoch {epoch} with metric value: {metric_value:.4f}"
+        )
+
+    def get_latest_checkpoint(self) -> Optional[str]:
+        """Get the path to the latest checkpoint in the directory."""
+        checkpoints = list(self.checkpoint_dir.glob("checkpoint_epoch_*.pth"))
+        if not checkpoints:
+            return None
+
+        # Sort by epoch number
+        checkpoints.sort(key=lambda x: int(x.stem.split("_")[-1]))
+        return str(checkpoints[-1])
+
+    def get_best_checkpoint(self) -> Optional[str]:
+        """Get the path to the best checkpoint."""
+        best_path = self.checkpoint_dir / "best_model.pth"
+        return str(best_path) if best_path.exists() else None
 
     def load(
         self,
@@ -317,20 +399,72 @@ class CheckpointManager:
         optimizer: torch.optim.Optimizer,
         lr_scheduler: torch.optim.lr_scheduler._LRScheduler,
         device: torch.device,
-    ) -> tuple[int, int]:
+    ) -> tuple[int, int, float]:
         """Load training checkpoint.
 
         Returns:
-            Tuple of (epoch, global_step)
+            Tuple of (epoch, global_step, metric_value)
         """
-        logging.info(f"Loading checkpoint from {checkpoint_path}")
+        if is_main_process():
+            logging.info(f"Loading checkpoint from {checkpoint_path}")
+
         checkpoint = torch.load(checkpoint_path, map_location=device)
 
-        model.load_state_dict(checkpoint["model_state_dict"])
-        optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
-        lr_scheduler.load_state_dict(checkpoint["lr_scheduler_state_dict"])
+        # Handle DDP model state dict
+        state_dict = checkpoint["model_state_dict"]
+        if isinstance(model, DistributedDataParallel):
+            # If current model is DDP but checkpoint is not
+            if not any(k.startswith("module.") for k in state_dict.keys()):
+                if is_main_process():
+                    logging.info(
+                        "Converting state dict for DDP model (adding 'module.' prefix)"
+                    )
+                state_dict = {f"module.{k}": v for k, v in state_dict.items()}
+        else:
+            # If current model is not DDP but checkpoint is
+            if any(k.startswith("module.") for k in state_dict.keys()):
+                if is_main_process():
+                    logging.info(
+                        "Converting DDP state dict for non-DDP model (removing 'module.' prefix)"
+                    )
+                state_dict = {
+                    k.replace("module.", ""): v for k, v in state_dict.items()
+                }
 
-        return checkpoint["epoch"], checkpoint["global_step"]
+        # Load state dict and log any unexpected keys
+        try:
+            missing_keys, unexpected_keys = model.load_state_dict(
+                state_dict, strict=False
+            )
+            if is_main_process():
+                if missing_keys:
+                    logging.warning("Missing keys in state dict:")
+                    for key in missing_keys:
+                        logging.warning(f"  - {key}")
+                if unexpected_keys:
+                    logging.warning("Unexpected keys in state dict:")
+                    for key in unexpected_keys:
+                        logging.warning(f"  - {key}")
+        except Exception as e:
+            if is_main_process():
+                logging.error(f"Error loading state dict: {str(e)}")
+            raise
+
+        # Load optimizer and scheduler states
+        try:
+            optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+            lr_scheduler.load_state_dict(checkpoint["lr_scheduler_state_dict"])
+        except Exception as e:
+            if is_main_process():
+                logging.error(f"Error loading optimizer or scheduler state: {str(e)}")
+            raise
+
+        metric_value = checkpoint.get("metric_value", float("inf"))
+
+        if is_main_process():
+            logging.info("Successfully loaded checkpoint state dict")
+
+        return checkpoint["epoch"], checkpoint["global_step"], metric_value
 
 
 class TrainingLoopManager:
@@ -390,6 +524,7 @@ class TrainingLoopManager:
                     model=self.model,
                     optimizer=self.optimizer,
                     lr_scheduler=self.lr_scheduler,
+                    metric_value=trainer.get_checkpoint_metric(val_metrics),
                     is_best=is_best,
                 )
 
@@ -536,11 +671,44 @@ class BaseTrainer(ABC):
         self.lr_scheduler = lr_scheduler
 
         # Setup logging and metrics
-        self.writer = (
-            SummaryWriter(self.output_dir / "tensorboard")
-            if is_main_process()
-            else None
-        )
+        if is_main_process():
+            # Create tensorboard writer with purge_step to handle resuming
+            log_dir = self.output_dir / "tensorboard"
+            if config.training.resume_from:
+                # If resuming, try to find the last global step from existing events
+                try:
+                    from tensorboard.backend.event_processing.event_accumulator import (
+                        EventAccumulator,
+                    )
+
+                    event_acc = EventAccumulator(str(log_dir))
+                    event_acc.Reload()
+
+                    # Find the last step from any scalar event
+                    last_step = 0
+                    for tag in event_acc.Tags()["scalars"]:
+                        events = event_acc.Scalars(tag)
+                        if events:
+                            last_step = max(last_step, events[-1].step)
+
+                    if last_step > 0:
+                        if is_main_process():
+                            logging.info(
+                                f"Resuming tensorboard logging from step {last_step}"
+                            )
+                        self.writer = SummaryWriter(log_dir, purge_step=last_step)
+                    else:
+                        self.writer = SummaryWriter(log_dir)
+                except Exception as e:
+                    if is_main_process():
+                        logging.warning(
+                            f"Failed to determine last tensorboard step: {str(e)}"
+                        )
+                    self.writer = SummaryWriter(log_dir)
+            else:
+                self.writer = SummaryWriter(log_dir)
+        else:
+            self.writer = None
 
         # Initialize metric handler and checkpoint manager
         self.metric_handler = MetricHandler(self.writer, config)
@@ -803,9 +971,102 @@ class DETRTrainer(BaseTrainer):
             compute_loss_fn=self.compute_loss,
         )
 
-        # Resume from checkpoint if provided
-        if resume_from:
-            self.load_checkpoint(resume_from)
+    def resume_from_checkpoint(self, checkpoint_path: str):
+        """Resume training from a checkpoint file or directory.
+
+        Args:
+            checkpoint_path: Path to checkpoint file or directory containing checkpoints
+        """
+        if (
+            not hasattr(self, "training_loop_manager")
+            or self.training_loop_manager is None
+        ):
+            raise RuntimeError(
+                "Training loop manager must be set before resuming from checkpoint"
+            )
+
+        try:
+            if is_main_process():
+                logging.info("=" * 80)
+                logging.info("Resuming Training from Checkpoint")
+                logging.info("=" * 80)
+                logging.info(f"Original checkpoint path: {checkpoint_path}")
+                logging.info(f"Resume mode: {self.config.training.resume_mode}")
+
+            # If directory is provided, try to find best or latest checkpoint based on resume_mode
+            if os.path.isdir(checkpoint_path):
+                checkpoint_dir = Path(checkpoint_path) / "checkpoints"
+                if not checkpoint_dir.exists():
+                    raise ValueError(
+                        f"Checkpoint directory not found: {checkpoint_dir}"
+                    )
+
+                if is_main_process():
+                    logging.info(f"Searching for checkpoints in: {checkpoint_dir}")
+
+                # Choose checkpoint based on resume_mode
+                if self.config.training.resume_mode.lower() == "best":
+                    checkpoint_path = self.checkpoint_manager.get_best_checkpoint()
+                    if checkpoint_path:
+                        if is_main_process():
+                            logging.info(f"Found best checkpoint: {checkpoint_path}")
+                            logging.info("Resuming from best checkpoint")
+                    else:
+                        if is_main_process():
+                            logging.warning(
+                                "Best checkpoint not found, falling back to latest"
+                            )
+                        checkpoint_path = (
+                            self.checkpoint_manager.get_latest_checkpoint()
+                        )
+                else:  # "latest" mode
+                    checkpoint_path = self.checkpoint_manager.get_latest_checkpoint()
+                    if checkpoint_path:
+                        if is_main_process():
+                            logging.info(f"Found latest checkpoint: {checkpoint_path}")
+                            logging.info("Resuming from latest checkpoint")
+
+                if not checkpoint_path:
+                    raise ValueError(f"No checkpoints found in {checkpoint_dir}")
+
+            # Load the checkpoint
+            if is_main_process():
+                logging.info(f"Loading checkpoint state from: {checkpoint_path}")
+
+            epoch, global_step, metric_value = self.checkpoint_manager.load(
+                checkpoint_path,
+                self.model,
+                self.optimizer,
+                self.lr_scheduler,
+                self.device,
+            )
+
+            self.current_epoch = epoch + 1  # Start from next epoch
+            self.global_step = global_step
+            if hasattr(self, "training_loop_manager"):
+                self.training_loop_manager.current_epoch = self.current_epoch
+                self.training_loop_manager.best_metric = metric_value
+
+            if is_main_process():
+                logging.info("-" * 40)
+                logging.info("Successfully restored checkpoint state:")
+                logging.info(f"  - Previous epoch: {epoch}")
+                logging.info(f"  - Global step: {global_step}")
+                logging.info(f"  - Best metric value: {metric_value:.4f}")
+                logging.info(f"  - Resuming from epoch: {self.current_epoch}")
+                logging.info("-" * 40)
+
+            # Ensure all processes are synchronized
+            if dist.is_initialized():
+                dist.barrier()
+
+        except Exception as e:
+            logging.error("=" * 80)
+            logging.error("Failed to resume from checkpoint")
+            logging.error("-" * 40)
+            logging.error(f"Error details: {str(e)}")
+            logging.error("=" * 80)
+            raise
 
     def _create_evaluator(self, ann_file: str, split: str) -> CocoEvaluator:
         """Create a COCO evaluator for a specific data split.
@@ -921,7 +1182,7 @@ def create_trainer(
     Args:
         config: Configuration object
         output_dir: Directory for saving outputs
-        resume_from: Optional path to checkpoint to resume from
+        resume_from: Optional path to checkpoint file or directory to resume from
 
     Returns:
         Initialized trainer instance
@@ -945,7 +1206,7 @@ def create_trainer(
     optimizer = create_optimizer(model.parameters(), config)
     lr_scheduler = create_scheduler(optimizer, config)
 
-    # Create trainer
+    # Create trainer without resuming yet
     trainer = DETRTrainer(
         config=config,
         model=model,
@@ -955,10 +1216,10 @@ def create_trainer(
         lr_scheduler=lr_scheduler,
         device=device,
         output_dir=output_dir,
-        resume_from=resume_from,
+        resume_from=None,  # Don't resume yet
     )
 
-    # Create and set training loop manager
+    # Create and set training loop manager first
     training_loop_manager = TrainingLoopManager(
         config=config,
         model=model,
@@ -968,5 +1229,9 @@ def create_trainer(
         metric_handler=trainer.metric_handler,
     )
     trainer.set_training_loop_manager(training_loop_manager)
+
+    # Now resume from checkpoint if provided
+    if resume_from:
+        trainer.resume_from_checkpoint(resume_from)
 
     return trainer
