@@ -1,0 +1,15 @@
+pretrained/
+
+**/__pycache__/
+
+test_viz/
+outputs/
+**/*.txt
+**/*.ini
+coco/
+**/*.png
+output/
+**/outputs/
+
+
+!project.md

@@ -1,0 +1,31 @@
+# ResNet-18 configuration - lightweight model variant
+
+# Model Configuration
+model:
+  backbone_name: resnet18  # default: resnet50
+  hidden_dim: 128  # default: 256
+  num_encoder_layers: 3  # default: 6
+  num_decoder_layers: 3  # default: 6
+  dim_feedforward: 1024  # default: 2048
+  num_queries: 50  # default: 100
+  bbox_predictor:
+    hidden_dim: 128  # default: 256
+
+# Training Configuration
+training:
+  max_epochs: 100  # default: 300
+
+# Optimizer Configuration
+optimizer:
+  lr: 2.0e-4  # default: 1.0e-4
+  lr_scheduler:
+    step_size: 100  # default: 200
+    warmup_epochs: 5  # default: 0
+
+# Augmentation Configuration
+augmentation:
+  min_size: 600  # default: 800
+  max_size: 1000  # default: 1333
+  train:
+    random_resize:
+      enabled: false  # default: true

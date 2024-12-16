@@ -1,0 +1,14 @@
+# ResNet-34 configuration - medium-sized model variant
+
+# Model Configuration
+model:
+  backbone_name: resnet34  # default: resnet50
+
+# Training Configuration
+training:
+  max_epochs: 50  # default: 300
+
+# Optimizer Configuration
+optimizer:
+  lr_scheduler:
+    warmup_epochs: 10  # default: 0

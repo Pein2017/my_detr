@@ -1,0 +1,172 @@
+# Default DETR Configuration
+
+defaults:
+  - _self_
+  - optional exp@_here_: ${exp}
+
+hydra:
+  run:
+    dir: .
+  output_subdir: null
+  job:
+    chdir: true
+  job_logging:
+    root:
+      level: INFO
+  hydra_logging:
+    root:
+      level: INFO
+
+# Data Configuration
+data:
+  data_root_dir: /data/training_code/Pein/DETR/my_detr/coco
+  train_dir: train2017
+  val_dir: val2017
+  train_ann: annotations/instances_train2017.json
+  val_ann: annotations/instances_val2017.json
+  pin_memory: true
+  shuffle_train: true
+  shuffle_val: false
+  persistent_workers: true
+
+# Output Configuration
+output:
+  base_dir: output
+  log_dir: tensorboard
+  checkpoint_dir: checkpoints
+  visualization_dir: visualizations
+
+# Model Configuration
+model:
+  backbone_name: resnet50
+  pretrained_backbone: false
+  num_classes: 91
+  hidden_dim: 256
+  nheads: 8
+  num_encoder_layers: 6
+  num_decoder_layers: 6
+  dim_feedforward: 2048
+  dropout: 0.1
+  num_queries: 100
+  learnable_tgt: false
+
+  position_embedding:
+    type: sine
+    normalize: true
+  
+  bbox_predictor:
+    num_layers: 3
+    hidden_dim: 256
+  
+  init:
+    xavier_uniform: true
+    prior_prob: 0.01
+
+# Training Configuration
+training:
+  max_epochs: 300
+  batch_size: 2
+  num_workers: 4
+  seed: 17
+  deterministic: false
+  gradient_clip_val: 0.1
+  accumulate_grad_batches: 1
+  check_val_every_n_epoch: 1
+  precision: 32
+  detect_anomaly: true
+
+# Optimizer Configuration
+optimizer:
+  name: adamw
+  lr: 1.0e-4
+  weight_decay: 1.0e-4
+  backbone_lr_factor: 0.1
+  
+  lr_scheduler:
+    name: step
+    step_size: 200
+    gamma: 0.1
+    warmup_epochs: 0
+    warmup_factor: 1.0
+    min_lr: 0.0
+
+# Loss Configuration
+loss:
+  cost_class: 1.0
+  cost_bbox: 5.0
+  cost_giou: 2.0
+  class_loss_coef: 1.0
+  bbox_loss_coef: 5.0
+  giou_loss_coef: 2.0
+  empty_weight: 0.1
+
+# Augmentation Configuration
+augmentation:
+  scales: [480, 512, 544, 576, 608, 640, 672, 704, 736, 768, 800]
+  max_size: 1333
+  min_size: 800
+  
+  train:
+    horizontal_flip:
+      enabled: true
+      prob: 0.5
+    random_resize:
+      enabled: true
+      scales: [400, 500, 600]
+      crop_size: [384, 600]
+    normalize:
+      mean: [0.485, 0.456, 0.406]
+      std: [0.229, 0.224, 0.225]
+  
+  val:
+    scales: [800]
+    max_size: 1333
+    normalize:
+      mean: [0.485, 0.456, 0.406]
+      std: [0.229, 0.224, 0.225]
+  
+  color_jitter:
+    enabled: false
+
+# Distributed Configuration
+distributed:
+  strategy: auto
+  sync_batchnorm: false
+  find_unused_parameters: false
+  num_nodes: 1
+  num_gpus: 1
+
+# Logging Configuration
+logging:
+  save_top_k: 3
+  monitor_metric: val/loss_epoch
+  monitor_mode: min
+  experiment_name: detr_${model.backbone_name}
+  log_step_ratio: 0.05  
+  save_checkpoint_every_n_epochs: 1
+  
+  tensorboard:
+    default_hp_metric: false
+    log_dir: tensorboard
+  
+  visualization:
+    enabled: true
+    num_images: 16
+    score_threshold: 0.7
+  
+  process_logs:
+    enabled: true
+    output_dir: tensorboard/process_logs
+
+# Debug Configuration
+debug:
+  enabled: false
+  num_batches: 2
+  samples: 16
+  data_dir: ${data.data_root_dir}/debug_data  # Directory for debug data
+
+# Calculated values
+calculated:
+  total_batch_size: ${eval:training.batch_size * distributed.num_gpus}
+  experiment_name: detr_${model.backbone_name}_lr_${optimizer.lr}_bs_${calculated.total_batch_size}_ep_${training.max_epochs}
+

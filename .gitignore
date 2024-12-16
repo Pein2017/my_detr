@@ -1,5 +1,7 @@
 /coco
 /output
 /test_viz
-
+**/*.pth
+**/*.pt
 **/__pycache__
+

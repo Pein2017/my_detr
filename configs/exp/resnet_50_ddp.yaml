@@ -1,0 +1,33 @@
+# ResNet-50 DDP configuration
+
+# Distributed Configuration
+distributed:
+  strategy: ddp  # default: auto
+  sync_batchnorm: true  # default: false
+  num_gpus: 8  # default: 1
+
+optimizer:
+  lr: 1.0e-4
+  backbone_lr_factor: 0.1
+  lr_scheduler:
+    name: step
+    step_size: 100
+    warmup_epochs: 10
+
+# Training Configuration
+training:
+  batch_size: 8
+  max_epochs: 150
+
+# Model Configuration
+model:
+  backbone_name: resnet50
+  pretrained_backbone: true
+
+# Calculated values
+calculated:
+  total_batch_size: 64
+  experiment_name: detr_${model.backbone_name}_lr_${optimizer.lr}_bs_${calculated.total_batch_size}_ep_${training.max_epochs}
+
+logging:
+  experiment_name: ${calculated.experiment_name}

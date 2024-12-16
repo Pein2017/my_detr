@@ -1,0 +1,59 @@
+# Debug configuration for fast development and testing
+
+# Debug Configuration
+debug:
+  enabled: true
+  num_batches: 4
+  samples: 16
+
+# Logging level configuration
+hydra:
+  job_logging:
+    root:
+      level: INFO
+  hydra_logging:
+    root:
+      level: INFO
+
+# Distributed Configuration
+distributed:
+  strategy: ddp
+  sync_batchnorm: true
+  num_gpus: 2
+
+
+# Logging Configuration
+logging:
+  experiment_name: "detr_ddp_debug"
+  log_step_ratio: 0.01
+  save_top_k: 3
+
+optimizer:
+  lr: 1.0e-3
+  lr_scheduler:
+    name: step
+    step_size: 30
+    gamma: 0.1
+    warmup_epochs: 5
+    warmup_factor: 1.0
+    min_lr: 0.0
+
+# Training Configuration
+training:
+  max_epochs: 10
+  batch_size: 2
+  num_workers: 2
+
+# Model Configuration
+model:
+  backbone_name: "resnet18"
+  hidden_dim: 128
+  nheads: 4
+  num_encoder_layers: 3
+  num_decoder_layers: 3
+  num_queries: 50
+  pretrained_backbone: true
+
+# Data Configuration
+data:
+  persistent_workers: false
