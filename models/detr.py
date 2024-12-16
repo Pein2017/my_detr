@@ -101,9 +101,9 @@ class DETR(nn.Module):
 
         # Initialize class prediction bias for better convergence
         bias_value = -math.log((1 - prior_prob) / prior_prob)
-        self.class_embed.bias.data = (
-            torch.ones(self.class_embed.bias.shape) * bias_value
-        )
+        self.class_embed.bias.data = torch.ones(self.num_classes + 1) * bias_value
+        # Set different bias for background class (last class)
+        self.class_embed.bias.data[-1] = -bias_value  # Different bias for background
 
     def forward(self, x: torch.Tensor) -> Dict[str, torch.Tensor]:
         """

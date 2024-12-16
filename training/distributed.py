@@ -116,8 +116,9 @@ def create_distributed_model(
                 p.numel() for p in model.parameters() if p.requires_grad
             )
             logging.info(
-                f"Model parameters before DDP wrapping: "
-                f"total={total_params}, trainable={trainable_params}"
+                f"Model parameters before DDP wrapping:\n"
+                f"  Total Parameters    : {total_params}\n"
+                f"  Trainable Parameters: {trainable_params}"
             )
 
             # Use more flexible DDP settings

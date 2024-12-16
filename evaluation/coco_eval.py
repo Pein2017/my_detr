@@ -165,9 +165,40 @@ class CocoEvaluator:
                 - labels: tensor [N]
         """
         if not predictions:
+            logging.info("No predictions received in update")
             return
 
+        # Add debugging
+        total_boxes = sum(len(p["boxes"]) for p in predictions.values())
+        logging.info(
+            f"Received {len(predictions)} images with total {total_boxes} boxes"
+        )
+
+        # Log some statistics about the predictions
+        if total_boxes > 0:
+            all_scores = torch.cat([p["scores"] for p in predictions.values()])
+            all_labels = torch.cat([p["labels"] for p in predictions.values()])
+
+            # Get label counts and only show non-zero entries
+            label_counts = torch.bincount(all_labels.long())
+            non_zero_labels = torch.nonzero(label_counts).squeeze()
+            if len(non_zero_labels.shape) == 0:  # Handle single label case
+                non_zero_labels = non_zero_labels.unsqueeze(0)
+
+            label_info = [
+                f"class_{idx.item()}: {count.item()}"
+                for idx, count in zip(non_zero_labels, label_counts[non_zero_labels])
+            ]
+
+            logging.info(
+                f"Prediction stats - Score range: [{all_scores.min().item():.3f}, {all_scores.max().item():.3f}], "
+                f"mean: {all_scores.mean().item():.3f}, "
+                f"Active classes: {', '.join(label_info)}"
+            )
+
         coco_results = self.prepare_for_coco_detection(predictions)
+        logging.info(f"Converted {len(coco_results)} predictions to COCO format")
+
         self.predictions.extend(coco_results)
         self.img_ids.extend(list(predictions.keys()))
 

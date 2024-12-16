@@ -29,6 +29,23 @@ def prepare_predictions(
     pred_logits = outputs["pred_logits"]
     pred_boxes = outputs["pred_boxes"]
 
+    # Add debugging logs
+    with torch.no_grad():
+        # Check confidence distribution
+        scores = F.softmax(pred_logits, dim=-1)
+        background_probs = scores[:, :, -1].mean().item()
+        max_class_probs = scores[:, :, :-1].max(dim=-1)[0].mean().item()
+        logging.info(
+            f"Prediction stats - Avg background prob: {background_probs:.3f}, Avg max class prob: {max_class_probs:.3f}"
+        )
+
+        # Check box statistics
+        logging.info(
+            f"Box stats - range: [{pred_boxes.min().item():.3f}, {pred_boxes.max().item():.3f}], "
+            f"means: {pred_boxes.mean(dim=(0,1)).tolist()}, "
+            f"std: {pred_boxes.std(dim=(0,1)).tolist()}"
+        )
+
     predictions = {}
     for idx, (logits, boxes) in enumerate(zip(pred_logits, pred_boxes)):
         # Get scores and labels
@@ -130,7 +147,7 @@ def evaluate_predictions(
 
     try:
         # Check if we have any predictions to evaluate
-        if not hasattr(evaluator, 'img_ids') or not evaluator.img_ids:
+        if not hasattr(evaluator, "img_ids") or not evaluator.img_ids:
             if trainer_is_global_zero:
                 logging.info(
                     f"[Epoch {current_epoch}] No predictions collected for evaluation. "
@@ -182,5 +199,7 @@ def evaluate_predictions(
     except Exception as e:
         if trainer_is_global_zero:
             logging.error(f"Error during evaluation: {str(e)}")
-            logging.info(f"[Epoch {current_epoch}] All metrics are zero. This is normal during early training.")
+            logging.info(
+                f"[Epoch {current_epoch}] All metrics are zero. This is normal during early training."
+            )
         return dummy_metrics

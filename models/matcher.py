@@ -7,6 +7,7 @@ import torch
 from scipy.optimize import linear_sum_assignment
 from torch import nn
 from torchvision.ops.boxes import box_area
+import logging
 
 
 def box_cxcywh_to_xyxy(x):
@@ -138,11 +139,16 @@ class HungarianMatcher(nn.Module):
         """
         bs, num_queries = outputs["pred_logits"].shape[:2]
 
+        # Add debugging logs for input shapes and statistics
+        total_targets = sum(len(t["labels"]) for t in targets)
+        logging.debug(
+            f"Matcher input - Batch size: {bs}, Queries per image: {num_queries}, "
+            f"Total targets: {total_targets}, Avg targets per image: {total_targets/bs:.1f}"
+        )
+
         # We flatten to compute the cost matrices in a batch
-        out_prob = (
-            outputs["pred_logits"].flatten(0, 1).softmax(-1)
-        )  # [batch_size * num_queries, num_classes]
-        out_bbox = outputs["pred_boxes"].flatten(0, 1)  # [batch_size * num_queries, 4]
+        out_prob = outputs["pred_logits"].flatten(0, 1).softmax(-1)
+        out_bbox = outputs["pred_boxes"].flatten(0, 1)
 
         # Also concat the target labels and boxes
         tgt_ids = torch.cat([v["labels"] for v in targets])
@@ -173,6 +179,14 @@ class HungarianMatcher(nn.Module):
         indices = [
             linear_sum_assignment(c[i]) for i, c in enumerate(C.split(sizes, -1))
         ]
+
+        # Log matching results
+        total_matches = sum(len(i[0]) for i in indices)
+        logging.debug(
+            f"Matching results - Total matches: {total_matches}, "
+            f"Avg matches per image: {total_matches/bs:.1f}"
+        )
+
         return [
             (
                 torch.as_tensor(i, dtype=torch.int64),
