@@ -180,6 +180,7 @@ class MetricHandler:
         effective_batches: int,
         current_epoch: int,
         lr: float,
+        dataset: Optional[object] = None,
     ):
         """Update metrics for the current step."""
         global_step = current_epoch * effective_batches + batch_idx
@@ -201,7 +202,7 @@ class MetricHandler:
         if evaluator is not None:
             try:
                 predictions = prepare_predictions(
-                    outputs, targets, score_threshold=0.001
+                    outputs, targets, score_threshold=0.001, dataset=dataset
                 )
                 if predictions:
                     evaluator.update(predictions)
@@ -219,12 +220,28 @@ class MetricHandler:
                         prefixed_metrics = self._get_prefixed_metrics(metrics, prefix)
                         self._update_metric_buffers(prefixed_metrics, len(targets))
                         evaluator.reset()
-            except Exception as e:
-                logging.error(f"Error during evaluation: {str(e)}")
-                if is_main_process():
-                    logging.info(
-                        f"[Epoch {current_epoch}] All metrics are zero. This is normal during early training."
+
+            except RuntimeError as e:
+                if "Evaluation failed" in str(e):
+                    logging.error(
+                        f"Critical evaluation error at epoch {current_epoch}, batch {batch_idx}: {str(e)}"
                     )
+                    if is_main_process():
+                        logging.error(
+                            "Training will be terminated due to evaluation failure"
+                        )
+                    raise RuntimeError(
+                        "Training terminated due to evaluation failure"
+                    ) from e
+                else:
+                    # For other runtime errors, log but continue training
+                    logging.error(f"Evaluation error (non-critical): {str(e)}")
+                    prefixed_metrics = self._get_prefixed_metrics(
+                        self.default_metrics.copy(), prefix
+                    )
+                    self._update_metric_buffers(prefixed_metrics, len(targets))
+            except Exception as e:
+                logging.error(f"Unexpected error during evaluation: {str(e)}")
                 prefixed_metrics = self._get_prefixed_metrics(
                     self.default_metrics.copy(), prefix
                 )
@@ -288,7 +305,17 @@ class MetricHandler:
 
     def reset(self):
         """Reset metric logger for new epoch."""
+        # Store the old epoch history if it exists
+        old_epoch_history = []
+        if hasattr(self.metric_logger, "epoch_history"):
+            old_epoch_history = self.metric_logger.epoch_history
+
+        # Create new metric logger
         self.metric_logger = MetricLogger(writer=self.writer)
+
+        # Restore the epoch history
+        self.metric_logger.epoch_history = old_epoch_history
+
         # Initialize with default metrics for both train and val
         train_metrics = {
             f"train_metrics/{k}": v for k, v in self.default_metrics.items()
@@ -822,6 +849,8 @@ class BaseTrainer(ABC):
 
         # Reset metric logger for new epoch
         self.metric_handler.reset()
+        # Start epoch timing
+        self.metric_handler.metric_logger.start_epoch()
 
         # Get effective number of batches
         num_batches = len(data_loader)
@@ -832,12 +861,16 @@ class BaseTrainer(ABC):
         data_time = SmoothedValue(fmt="{median:.4f} ({global_avg:.4f})")
         start_time = time.time()
 
-        # Get current epoch from training loop manager
+        # Get current epoch and max epochs from training loop manager
         current_epoch = (
             self.training_loop_manager.current_epoch
             if hasattr(self, "training_loop_manager")
             else self.current_epoch
         )
+        max_epochs = self.config.training.max_epochs
+
+        # Calculate logging frequency
+        log_freq = max(1, int(effective_batches * self.config.logging.log_step_ratio))
 
         # Process batches with metric logging
         for batch_idx, (images, targets) in enumerate(data_loader):
@@ -854,46 +887,55 @@ class BaseTrainer(ABC):
                 if training:
                     self.batch_processor.update_step(loss_dict["loss"])
 
-                # Log metrics
+                # Update metrics
                 self.metric_handler.update_metrics(
-                    loss_dict,
-                    outputs,
-                    targets,
-                    evaluator,
-                    mode,
-                    batch_idx,
-                    effective_batches,
-                    current_epoch,
-                    self.optimizer.param_groups[0]["lr"],
+                    loss_dict=loss_dict,
+                    outputs=outputs,
+                    targets=targets,
+                    evaluator=evaluator,
+                    prefix=mode,
+                    batch_idx=batch_idx,
+                    effective_batches=effective_batches,
+                    current_epoch=current_epoch,
+                    lr=self.optimizer.param_groups[0]["lr"],
+                    dataset=data_loader.dataset,
                 )
 
-                # Calculate log frequency based on ratio
-                log_every_n_steps = max(
-                    1, int(effective_batches * self.config.logging.log_step_ratio)
-                )
+                # Log timing info with training ETA
+                iter_time.update(time.time() - data_end)
+                if batch_idx % log_freq == 0:
+                    logging.info(
+                        f"[Epoch {current_epoch}/{max_epochs}][{batch_idx}/{effective_batches}] "
+                        f"Time {iter_time.median:.4f} ({iter_time.avg:.4f}) "
+                        f"Data {data_time.median:.4f} ({data_time.avg:.4f})"
+                    )
 
-                # Log progress at appropriate intervals
-                if (
-                    batch_idx % log_every_n_steps == 0
-                    or batch_idx == effective_batches - 1
-                ):
-                    eta_seconds = iter_time.global_avg * (effective_batches - batch_idx)
-                    eta_string = str(datetime.timedelta(seconds=int(eta_seconds)))
-                    current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    # Calculate and log ETAs
+                    iter_eta_seconds = iter_time.global_avg * (
+                        effective_batches - batch_idx
+                    )
+                    iter_eta_string = str(
+                        datetime.timedelta(seconds=int(iter_eta_seconds))
+                    )
 
-                    if is_main_process():
-                        timing_str = f"eta: {eta_string:>8} iter_t: {iter_time} data_t: {data_time}"
-                        metrics_str = str(self.metric_handler.metric_logger)
-                        current_batch = self.metric_handler.metric_logger.current_batch
-                        log_msg = (
-                            f"[{current_time}] "
-                            f"[Rank {get_rank()}] "
-                            f"{mode.capitalize()} Epoch [{current_epoch}/{self.config.training.max_epochs}] "
-                            f"[{current_batch}/{effective_batches}] "
-                            f"{timing_str} "
-                            f"{metrics_str}"
+                    if (
+                        hasattr(self.metric_handler.metric_logger, "epoch_history")
+                        and self.metric_handler.metric_logger.epoch_history
+                    ):
+                        avg_epoch_time = sum(
+                            self.metric_handler.metric_logger.epoch_history
+                        ) / len(self.metric_handler.metric_logger.epoch_history)
+                        remaining_epochs = max_epochs - current_epoch
+                        training_eta_seconds = (
+                            avg_epoch_time * remaining_epochs + iter_eta_seconds
                         )
-                        logging.info(log_msg)
+                        training_eta_string = str(
+                            datetime.timedelta(seconds=int(training_eta_seconds))
+                        )
+                        logging.info(
+                            f"ETAs - Current epoch: {iter_eta_string}, "
+                            f"Full training: {training_eta_string}"
+                        )
 
             except RuntimeError as e:
                 if "out of memory" in str(e):
@@ -909,7 +951,6 @@ class BaseTrainer(ABC):
                 logging.error(
                     f"Critical error in batch {batch_idx}: {str(e)}", exc_info=True
                 )
-                # Ensure all processes know about the failure
                 if dist.is_initialized():
                     dist.barrier()
                 raise RuntimeError(f"Training failed: {str(e)}") from e
@@ -921,6 +962,14 @@ class BaseTrainer(ABC):
             # Break if we've processed enough batches
             if batch_idx >= effective_batches - 1:
                 break
+
+        # End epoch timing and log
+        epoch_time = self.metric_handler.metric_logger.end_epoch()
+        if is_main_process():
+            logging.info(
+                f"Epoch {current_epoch} completed in "
+                f"{datetime.timedelta(seconds=int(epoch_time))}"
+            )
 
         # Return epoch metrics
         return self.metric_handler.get_epoch_metrics()

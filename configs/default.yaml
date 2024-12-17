@@ -38,9 +38,10 @@ output:
 
 # Model Configuration
 model:
+  use_aux_loss: true
   backbone_name: resnet50
   pretrained_backbone: false
-  num_classes: 91
+  num_classes: 80
   hidden_dim: 256
   nheads: 8
   num_encoder_layers: 6
@@ -110,12 +111,19 @@ augmentation:
   
   train:
     horizontal_flip:
-      enabled: true
       prob: 0.5
     random_resize:
-      enabled: true
       scales: [400, 500, 600]
       crop_size: [384, 600]
+    random_pad:
+      max_pad: 32
+    center_crop:
+      size: [384, 600]
+    random_erasing:
+      prob: 0.2
+      scale: [0.02, 0.33]
+      ratio: [0.3, 3.3]
+      value: 0
     normalize:
       mean: [0.485, 0.456, 0.406]
       std: [0.229, 0.224, 0.225]
@@ -123,6 +131,8 @@ augmentation:
   val:
     scales: [800]
     max_size: 1333
+    center_crop:
+      size: [384, 600]
     normalize:
       mean: [0.485, 0.456, 0.406]
       std: [0.229, 0.224, 0.225]

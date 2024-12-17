@@ -1,0 +1,133 @@
+2024-12-17 09:46:15,137 - INFO - Starting DETR tests...
+2024-12-17 09:46:15,869 - INFO - Using device: cuda
+2024-12-17 09:46:15,871 - INFO - 
+Test configuration:
+2024-12-17 09:46:15,873 - INFO - 
+model:
+  num_classes: 91
+  hidden_dim: 256
+  nheads: 8
+  num_encoder_layers: 3
+  num_decoder_layers: 3
+  dim_feedforward: 1024
+  dropout: 0.1
+  num_queries: 100
+  backbone_name: resnet18
+  pretrained_backbone: true
+  learnable_tgt: false
+  use_aux_loss: true
+  position_embedding:
+    type: sine
+    normalize: true
+  bbox_predictor:
+    num_layers: 3
+    hidden_dim: 256
+  init:
+    xavier_uniform: true
+    prior_prob: 0.01
+optimizer:
+  lr: 0.0001
+  weight_decay: 0.0001
+  backbone_lr_factor: 0.1
+
+2024-12-17 09:46:16,508 - INFO - 
+Testing transformer input/output shapes...
+2024-12-17 09:46:16,931 - INFO - 
+Output shapes:
+2024-12-17 09:46:16,931 - INFO - Pred logits shape: torch.Size([2, 100, 92]) (expected (2, 100, 92))
+2024-12-17 09:46:16,931 - INFO - Pred boxes shape: torch.Size([2, 100, 4]) (expected (2, 100, 4))
+2024-12-17 09:46:16,932 - INFO - 
+All output shapes verified successfully!
+2024-12-17 09:46:16,932 - INFO - 
+Testing auxiliary outputs...
+2024-12-17 09:46:16,958 - INFO - Main pred logits:
+  Shape: torch.Size([2, 100, 92])
+  Type: torch.float32
+  Device: cuda:0
+  Range: [-6.994, 5.414]
+2024-12-17 09:46:16,959 - INFO - Main pred boxes:
+  Shape: torch.Size([2, 100, 4])
+  Type: torch.float32
+  Device: cuda:0
+  Range: [0.291, 0.705]
+2024-12-17 09:46:16,959 - INFO - 
+Found auxiliary outputs:
+2024-12-17 09:46:16,959 - INFO - 
+Layer 0:
+2024-12-17 09:46:16,959 - INFO - Aux pred logits:
+  Shape: torch.Size([2, 100, 92])
+  Type: torch.float32
+  Device: cuda:0
+  Range: [-7.314, 5.275]
+2024-12-17 09:46:16,959 - INFO - Aux pred boxes:
+  Shape: torch.Size([2, 100, 4])
+  Type: torch.float32
+  Device: cuda:0
+  Range: [0.277, 0.798]
+2024-12-17 09:46:16,959 - INFO - 
+Layer 1:
+2024-12-17 09:46:16,960 - INFO - Aux pred logits:
+  Shape: torch.Size([2, 100, 92])
+  Type: torch.float32
+  Device: cuda:0
+  Range: [-7.089, 5.291]
+2024-12-17 09:46:16,960 - INFO - Aux pred boxes:
+  Shape: torch.Size([2, 100, 4])
+  Type: torch.float32
+  Device: cuda:0
+  Range: [0.272, 0.739]
+2024-12-17 09:46:16,960 - INFO - 
+Testing optimizer configuration...
+2024-12-17 09:46:17,366 - INFO - Optimizer type: AdamW
+2024-12-17 09:46:17,366 - INFO - 
+Parameter group 0:
+2024-12-17 09:46:17,366 - INFO - Learning rate: 0.0001
+2024-12-17 09:46:17,367 - INFO - Weight decay: 0.0001
+2024-12-17 09:46:17,367 - INFO - Number of parameters: 45
+2024-12-17 09:46:17,367 - INFO - 
+Parameter group 1:
+2024-12-17 09:46:17,367 - INFO - Learning rate: 1e-05
+2024-12-17 09:46:17,367 - INFO - Weight decay: 0.0001
+2024-12-17 09:46:17,367 - INFO - Number of parameters: 60
+2024-12-17 09:46:17,367 - INFO - 
+Testing end-to-end forward pass...
+2024-12-17 09:46:17,645 - INFO - 
+Testing batch size: 1
+2024-12-17 09:46:17,666 - INFO - Pred logits:
+  Shape: torch.Size([1, 100, 92])
+  Type: torch.float32
+  Device: cuda:0
+  Range: [-7.522, 4.665]
+2024-12-17 09:46:17,667 - INFO - Pred boxes:
+  Shape: torch.Size([1, 100, 4])
+  Type: torch.float32
+  Device: cuda:0
+  Range: [0.250, 0.756]
+2024-12-17 09:46:17,667 - INFO - 
+Testing batch size: 2
+2024-12-17 09:46:17,676 - INFO - Pred logits:
+  Shape: torch.Size([2, 100, 92])
+  Type: torch.float32
+  Device: cuda:0
+  Range: [-7.543, 4.677]
+2024-12-17 09:46:17,676 - INFO - Pred boxes:
+  Shape: torch.Size([2, 100, 4])
+  Type: torch.float32
+  Device: cuda:0
+  Range: [0.252, 0.759]
+2024-12-17 09:46:17,676 - INFO - 
+Testing batch size: 4
+2024-12-17 09:46:17,700 - INFO - Pred logits:
+  Shape: torch.Size([4, 100, 92])
+  Type: torch.float32
+  Device: cuda:0
+  Range: [-7.544, 4.683]
+2024-12-17 09:46:17,700 - INFO - Pred boxes:
+  Shape: torch.Size([4, 100, 4])
+  Type: torch.float32
+  Device: cuda:0
+  Range: [0.250, 0.761]
+2024-12-17 09:46:17,700 - INFO - 
+End-to-end test completed successfully!
+2024-12-17 09:46:17,701 - INFO - 
+All tests passed successfully!

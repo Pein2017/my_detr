@@ -83,6 +83,41 @@ class MetricLogger:
         self.global_step = 0
         self.start_time = time.time()
         self.current_batch = 0
+        self.epoch_start_time = time.time()
+        self.epoch_history = []
+
+    def start_epoch(self):
+        """Mark the start of a new epoch for timing purposes."""
+        self.epoch_start_time = time.time()
+
+    def end_epoch(self):
+        """Mark the end of an epoch and record timing."""
+        epoch_time = time.time() - self.epoch_start_time
+        self.epoch_history.append(epoch_time)
+        if self.writer is not None:
+            self.writer.add_scalar("time/epoch", epoch_time, self.epoch)
+        return epoch_time
+
+    def estimate_training_eta(self, current_epoch: int, max_epochs: int) -> str:
+        """Estimate time remaining for entire training based on epoch history."""
+        if not self.epoch_history:
+            return "N/A"
+
+        avg_epoch_time = sum(self.epoch_history) / len(self.epoch_history)
+        remaining_epochs = max_epochs - current_epoch
+        eta_seconds = avg_epoch_time * remaining_epochs
+
+        # Format ETA string
+        days = int(eta_seconds // (24 * 3600))
+        hours = int((eta_seconds % (24 * 3600)) // 3600)
+        minutes = int((eta_seconds % 3600) // 60)
+
+        if days > 0:
+            return f"{days}d {hours}h {minutes}m"
+        elif hours > 0:
+            return f"{hours}h {minutes}m"
+        else:
+            return f"{minutes}m"
 
     def update(
         self,
@@ -153,6 +188,7 @@ class MetricLogger:
         epoch: Optional[int] = None,
         prefix: str = "",
         total_length: Optional[int] = None,
+        max_epochs: Optional[int] = None,
     ):
         """
         Log metrics for every print_freq iterations.
@@ -163,21 +199,19 @@ class MetricLogger:
             epoch: Current epoch number
             prefix: String to prefix to the log message
             total_length: Total number of iterations (for progress bar)
+            max_epochs: Total number of epochs for ETA calculation
         """
         if total_length is None:
-            # Try to get length, otherwise use infinity
             total_length = (
                 len(iterable) if hasattr(iterable, "__len__") else float("inf")
             )
 
-        # Calculate padding for consistent formatting
         space_fmt = len(str(total_length))
 
         if epoch is not None:
             if "[" not in prefix:
                 prefix = f"[{epoch}] {prefix}"
 
-        # Store rank for reuse
         rank = get_rank()
 
         iter_time = SmoothedValue(fmt="{median:.4f} ({global_avg:.4f})")
@@ -192,40 +226,33 @@ class MetricLogger:
             iter_time.update(time.time() - data_end)
 
             if i % print_freq == 0 or i == total_length - 1:
-                eta_seconds = iter_time.global_avg * (total_length - i)
-                eta_string = str(datetime.timedelta(seconds=int(eta_seconds)))
+                # Calculate ETAs
+                iter_eta_seconds = iter_time.global_avg * (total_length - i)
+                iter_eta_string = str(datetime.timedelta(seconds=int(iter_eta_seconds)))
+
+                # Calculate training ETA if we have epoch history
+                training_eta = "N/A"
+                if max_epochs is not None and epoch is not None:
+                    training_eta = self.estimate_training_eta(epoch, max_epochs)
 
                 if is_main_process():
-                    # Get current timestamp
                     current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-                    # Create header with current timestamp and batch progress
                     header = f"[{current_time}][Rank {rank}] {prefix}"
-
-                    # Format progress with consistent spacing
                     progress_str = f"[{i:{space_fmt}d}/{total_length:{space_fmt}d}]"
-
-                    # Format timing info with fixed width
                     timing_str = (
-                        f"eta: {eta_string:>8} "
-                        f"iter_t: {iter_time} "
-                        f"data_t: {data_time}"
+                        f"epoch_eta: {iter_eta_string:>8} "
+                        f"training_eta: {training_eta:>8} "
+                        f"iter_time: {iter_time.median:.2f}s ({iter_time.global_avg:.2f}s) "
+                        f"data_time: {data_time.median:.2f}s ({data_time.global_avg:.2f}s)"
                     )
-
-                    # Format metrics with consistent delimiter
                     metrics_str = str(self)
-
-                    # Combine all parts with proper spacing
                     log_msg = f"{header} {progress_str} {timing_str} {metrics_str}"
                     logging.info(log_msg)
 
-                    # Log to tensorboard
                     if self.writer is not None:
                         step = self.global_step + i
-                        # Log all metrics
                         for name, meter in self.meters.items():
                             self.writer.add_scalar(name, meter.global_avg, step)
-                        # Log times
                         self.writer.add_scalar("time/iter", iter_time.avg, step)
                         self.writer.add_scalar("time/data", data_time.avg, step)
 
@@ -236,11 +263,38 @@ class MetricLogger:
 
     def __str__(self) -> str:
         """Get string representation of current metrics."""
+        # Order losses in a consistent way
+        loss_order = ["loss_ce", "loss_bbox", "loss_giou"]
         loss_str = []
-        for name, meter in self.meters.items():
-            if "loss" in name.lower():  # Group losses together
-                loss_str.append(f"{name}: {meter}")
 
+        # First add main losses in consistent order
+        for loss_name in loss_order:
+            full_name = f"loss/{loss_name}"
+            if full_name in self.meters:
+                loss_str.append(f"{loss_name}: {self.meters[full_name]}")
+
+        # Then add any auxiliary losses in the same order
+        aux_losses = []
+        i = 0
+        while True:
+            aux_found = False
+            for loss_name in loss_order:
+                aux_name = f"loss/{loss_name}_{i}"
+                if aux_name in self.meters:
+                    aux_found = True
+                    aux_losses.append(f"{loss_name}_{i}: {self.meters[aux_name]}")
+            if not aux_found:
+                break
+            i += 1
+
+        # Add total loss if present
+        if "loss/loss" in self.meters:
+            loss_str.append(f"total_loss: {self.meters['loss/loss']}")
+
+        # Add auxiliary losses after main losses
+        loss_str.extend(aux_losses)
+
+        # Add other metrics
         metric_str = []
         for name, meter in self.meters.items():
             if "loss" not in name.lower():  # Other metrics

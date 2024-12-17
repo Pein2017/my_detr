@@ -115,10 +115,12 @@ def create_distributed_model(
             trainable_params = sum(
                 p.numel() for p in model.parameters() if p.requires_grad
             )
+            total_size_mb = total_params * 4 / (1024**2)
+            trainable_size_mb = trainable_params * 4 / (1024**2)
             logging.info(
                 f"Model parameters before DDP wrapping:\n"
-                f"  Total Parameters    : {total_params}\n"
-                f"  Trainable Parameters: {trainable_params}"
+                f"  Total Parameters    : {total_params} ({total_size_mb:.2f} MB)\n"
+                f"  Trainable Parameters: {trainable_params} ({trainable_size_mb:.2f} MB)"
             )
 
             # Use more flexible DDP settings

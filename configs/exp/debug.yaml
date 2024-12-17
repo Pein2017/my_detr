@@ -2,7 +2,7 @@
 
 # Debug Configuration
 debug:
-  enabled: true
+  enabled: false
   num_batches: 4
   samples: 16
 

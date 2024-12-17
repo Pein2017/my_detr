@@ -4,7 +4,7 @@ Handles prediction preparation and score thresholding.
 """
 
 import logging
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import torch
 import torch.nn.functional as F
@@ -14,6 +14,7 @@ def prepare_predictions(
     outputs: Dict[str, torch.Tensor],
     targets: List[Dict],
     score_threshold: float = 0.01,
+    dataset: Optional[object] = None,
 ) -> Dict[int, Dict[str, torch.Tensor]]:
     """
     Convert model outputs to evaluation format.
@@ -22,6 +23,7 @@ def prepare_predictions(
         outputs: Model outputs containing 'pred_logits' and 'pred_boxes'
         targets: List of target dictionaries containing 'image_id'
         score_threshold: Score threshold for filtering predictions
+        dataset: Dataset object containing category mapping information
 
     Returns:
         Dict mapping image_id to predictions dict with keys 'boxes', 'scores', 'labels'
@@ -29,21 +31,22 @@ def prepare_predictions(
     pred_logits = outputs["pred_logits"]
     pred_boxes = outputs["pred_boxes"]
 
+    # Create reverse mapping from model indices to COCO category IDs
+    if hasattr(dataset, "cat_id_to_continuous_id"):
+        continuous_id_to_cat_id = {
+            v: k for k, v in dataset.cat_id_to_continuous_id.items()
+        }
+    else:
+        continuous_id_to_cat_id = None
+
     # Add debugging logs
     with torch.no_grad():
         # Check confidence distribution
         scores = F.softmax(pred_logits, dim=-1)
         background_probs = scores[:, :, -1].mean().item()
         max_class_probs = scores[:, :, :-1].max(dim=-1)[0].mean().item()
-        logging.info(
+        logging.debug(
             f"Prediction stats - Avg background prob: {background_probs:.3f}, Avg max class prob: {max_class_probs:.3f}"
-        )
-
-        # Check box statistics
-        logging.info(
-            f"Box stats - range: [{pred_boxes.min().item():.3f}, {pred_boxes.max().item():.3f}], "
-            f"means: {pred_boxes.mean(dim=(0,1)).tolist()}, "
-            f"std: {pred_boxes.std(dim=(0,1)).tolist()}"
         )
 
     predictions = {}
@@ -72,7 +75,7 @@ def prepare_predictions(
             predictions[image_id.item()] = {
                 "boxes": boxes,
                 "scores": scores_per_class,
-                "labels": labels + 1,  # COCO classes start from 1
+                "labels": labels,  # No need to add 1 since we'll map to COCO IDs
             }
             continue
 
@@ -88,7 +91,7 @@ def prepare_predictions(
             predictions[image_id.item()] = {
                 "boxes": boxes,
                 "scores": scores_per_class,
-                "labels": labels + 1,
+                "labels": labels,  # No need to add 1 since we'll map to COCO IDs
             }
             continue
 
@@ -107,17 +110,28 @@ def prepare_predictions(
         scores_per_class = scores_per_class[boxes_valid_dim]
         labels = labels[boxes_valid_dim]
 
+        # Convert model indices back to COCO category IDs
+        if continuous_id_to_cat_id is not None:
+            coco_labels = torch.tensor(
+                [continuous_id_to_cat_id[label.item()] for label in labels],
+                device=labels.device,
+                dtype=labels.dtype,
+            )
+        else:
+            coco_labels = labels + 1  # Default behavior: just add 1 for COCO format
+
         # Store predictions
         image_id = targets[idx]["image_id"]
         predictions[image_id.item()] = {
             "boxes": boxes,
             "scores": scores_per_class,
-            "labels": labels + 1,  # COCO classes start from 1
+            "labels": coco_labels,
         }
 
     return predictions
 
 
+# TODO: Test the evaluation since the map are 0 all the time
 def evaluate_predictions(
     evaluator,
     trainer_is_global_zero: bool,

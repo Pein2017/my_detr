@@ -1,5 +1,6 @@
 """Test DETR model with various input configurations."""
 
+import logging
 from typing import Dict
 
 import torch
@@ -7,6 +8,17 @@ import torch.nn.functional as F
 from omegaconf import DictConfig, OmegaConf
 
 from .detr import DETR
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('./models/test_model.log', mode='w'),
+        logging.StreamHandler()  # Also print to console
+    ]
+)
+logger = logging.getLogger(__name__)
 
 
 def create_test_config() -> Dict:
@@ -22,8 +34,9 @@ def create_test_config() -> Dict:
             "dropout": 0.1,
             "num_queries": 100,
             "backbone_name": "resnet18",
-            "pretrained_backbone": False,
+            "pretrained_backbone": True,
             "learnable_tgt": False,
+            "use_aux_loss": True,
             "position_embedding": {"type": "sine", "normalize": True},
             "bbox_predictor": {"num_layers": 3, "hidden_dim": 256},
             "init": {"xavier_uniform": True, "prior_prob": 0.01},
@@ -37,38 +50,40 @@ def create_test_config() -> Dict:
     return OmegaConf.create(config)
 
 
-def print_tensor_info(name: str, tensor: torch.Tensor):
-    """Print tensor information."""
-    print(f"{name}:")
-    print(f"  Shape: {tensor.shape}")
-    print(f"  Type: {tensor.dtype}")
-    print(f"  Device: {tensor.device}")
+def log_tensor_info(name: str, tensor: torch.Tensor):
+    """Log tensor information."""
+    info = [
+        f"{name}:",
+        f"  Shape: {tensor.shape}",
+        f"  Type: {tensor.dtype}",
+        f"  Device: {tensor.device}"
+    ]
     if tensor.numel() > 0:
-        print(f"  Range: [{tensor.min():.3f}, {tensor.max():.3f}]")
-    print()
+        info.append(f"  Range: [{tensor.min():.3f}, {tensor.max():.3f}]")
+    logger.info("\n".join(info))
 
 
 def test_backbone_output(model: DETR, device: torch.device):
     """Test backbone feature extraction."""
-    print("\nTesting backbone output...")
+    logger.info("\nTesting backbone output...")
     x = torch.randn(2, 3, 224, 224).to(device)
     features = model.backbone(x)
-    print_tensor_info("Backbone features", features)
+    log_tensor_info("Backbone features", features)
 
 
 def test_position_embedding(model: DETR, device: torch.device):
     """Test position embedding generation."""
-    print("\nTesting position embedding...")
+    logger.info("\nTesting position embedding...")
     x = torch.randn(2, 3, 224, 224).to(device)
     features = model.backbone(x)
     features = model.conv(features)
     pos_embed = model.position_embedding(features)
-    print_tensor_info("Position embedding", pos_embed)
+    log_tensor_info("Position embedding", pos_embed)
 
 
 def test_transformer_input_shapes(model: DETR, device: torch.device):
     """Test transformer input preparation."""
-    print("\nTesting transformer input/output shapes...")
+    logger.info("\nTesting transformer input/output shapes...")
 
     # Create input tensor
     x = torch.randn(2, 3, 224, 224).to(device)
@@ -82,11 +97,11 @@ def test_transformer_input_shapes(model: DETR, device: torch.device):
     expected_class_shape = (batch_size, model.num_queries, model.num_classes + 1)
     expected_box_shape = (batch_size, model.num_queries, 4)
 
-    print("\nOutput shapes:")
-    print(
+    logger.info("\nOutput shapes:")
+    logger.info(
         f"Pred logits shape: {output['pred_logits'].shape} (expected {expected_class_shape})"
     )
-    print(
+    logger.info(
         f"Pred boxes shape: {output['pred_boxes'].shape} (expected {expected_box_shape})"
     )
 
@@ -98,31 +113,12 @@ def test_transformer_input_shapes(model: DETR, device: torch.device):
         output["pred_boxes"].shape == expected_box_shape
     ), f"Box predictions shape mismatch: got {output['pred_boxes'].shape}, expected {expected_box_shape}"
 
-    print("\nAll output shapes verified successfully!")
-
-
-def test_fixed_size(config: Dict):
-    """Test DETR with fixed-size images (no padding mask needed)."""
-    print("\nTesting fixed-size images...")
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = DETR(config).to(device)
-    model.eval()
-
-    # Fixed-size input
-    batch_size = 2
-    input_tensor = torch.randn(batch_size, 3, 224, 224).to(device)
-
-    with torch.no_grad():
-        output = model(input_tensor)
-
-    print_tensor_info("Input", input_tensor)
-    print_tensor_info("Pred logits", output["pred_logits"])
-    print_tensor_info("Pred boxes", output["pred_boxes"])
+    logger.info("\nAll output shapes verified successfully!")
 
 
 def test_variable_size(config: Dict):
     """Test DETR with variable-size images (padding mask required)."""
-    print("\nTesting variable-size images...")
+    logger.info("\nTesting variable-size images...")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = DETR(config).to(device)
     model.eval()
@@ -152,15 +148,44 @@ def test_variable_size(config: Dict):
     with torch.no_grad():
         output = model(images, masks)
 
-    print_tensor_info("Input images", images)
-    print_tensor_info("Padding masks", masks)
-    print_tensor_info("Pred logits", output["pred_logits"])
-    print_tensor_info("Pred boxes", output["pred_boxes"])
+    log_tensor_info("Input images", images)
+    log_tensor_info("Padding masks", masks)
+    log_tensor_info("Pred logits", output["pred_logits"])
+    log_tensor_info("Pred boxes", output["pred_boxes"])
+
+
+def test_auxiliary_outputs(model: DETR, device: torch.device):
+    """Test auxiliary outputs from intermediate decoder layers."""
+    logger.info("\nTesting auxiliary outputs...")
+    x = torch.randn(2, 3, 224, 224).to(device)
+    
+    with torch.no_grad():
+        output = model(x)
+    
+    # Verify main outputs
+    log_tensor_info("Main pred logits", output["pred_logits"])
+    log_tensor_info("Main pred boxes", output["pred_boxes"])
+    
+    # Verify auxiliary outputs
+    if "aux_outputs" in output:
+        logger.info("\nFound auxiliary outputs:")
+        for i, aux_out in enumerate(output["aux_outputs"]):
+            logger.info(f"\nLayer {i}:")
+            log_tensor_info(f"Aux pred logits", aux_out["pred_logits"])
+            log_tensor_info(f"Aux pred boxes", aux_out["pred_boxes"])
+            
+            # Verify shapes match main output
+            assert aux_out["pred_logits"].shape == output["pred_logits"].shape, \
+                f"Auxiliary logits shape mismatch at layer {i}"
+            assert aux_out["pred_boxes"].shape == output["pred_boxes"].shape, \
+                f"Auxiliary boxes shape mismatch at layer {i}"
+    else:
+        logger.warning("\nNo auxiliary outputs found (use_aux_loss might be False)")
 
 
 def test_end_to_end(config: DictConfig):
     """Test complete forward pass with shape verification."""
-    print("\nTesting end-to-end forward pass...")
+    logger.info("\nTesting end-to-end forward pass...")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = DETR(config).to(device)
     model.eval()
@@ -168,7 +193,7 @@ def test_end_to_end(config: DictConfig):
     # Test with different batch sizes
     batch_sizes = [1, 2, 4]
     for batch_size in batch_sizes:
-        print(f"\nTesting batch size: {batch_size}")
+        logger.info(f"\nTesting batch size: {batch_size}")
         x = torch.randn(batch_size, 3, 224, 224).to(device)
 
         with torch.no_grad():
@@ -186,39 +211,47 @@ def test_end_to_end(config: DictConfig):
             output["pred_boxes"].shape == (B, N, 4)
         ), f"Boxes shape mismatch: expected {(B, N, 4)}, got {output['pred_boxes'].shape}"
 
-        print_tensor_info("Pred logits", output["pred_logits"])
-        print_tensor_info("Pred boxes", output["pred_boxes"])
+        log_tensor_info("Pred logits", output["pred_logits"])
+        log_tensor_info("Pred boxes", output["pred_boxes"])
 
-    print("\nEnd-to-end test completed successfully!")
+        # Verify auxiliary outputs if enabled
+        if model.use_aux_loss:
+            assert "aux_outputs" in output, "Auxiliary outputs missing when use_aux_loss=True"
+            num_aux = len(output["aux_outputs"])
+            expected_aux = model.transformer.decoder.num_layers - 1
+            assert num_aux == expected_aux, \
+                f"Expected {expected_aux} auxiliary outputs, got {num_aux}"
+
+    logger.info("\nEnd-to-end test completed successfully!")
 
 
 def test_optimizer(config: DictConfig):
     """Test optimizer configuration."""
-    print("\nTesting optimizer configuration...")
+    logger.info("\nTesting optimizer configuration...")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = DETR(config).to(device)
 
     optimizer = model.configure_optimizer(config)
-    print(f"Optimizer type: {type(optimizer).__name__}")
+    logger.info(f"Optimizer type: {type(optimizer).__name__}")
 
     # Verify parameter groups
     for i, param_group in enumerate(optimizer.param_groups):
-        print(f"\nParameter group {i}:")
-        print(f"Learning rate: {param_group['lr']}")
-        print(f"Weight decay: {param_group['weight_decay']}")
-        print(f"Number of parameters: {len(param_group['params'])}")
+        logger.info(f"\nParameter group {i}:")
+        logger.info(f"Learning rate: {param_group['lr']}")
+        logger.info(f"Weight decay: {param_group['weight_decay']}")
+        logger.info(f"Number of parameters: {len(param_group['params'])}")
 
 
 def main():
     """Run comprehensive tests."""
-    print("Starting DETR tests...")
+    logger.info("Starting DETR tests...")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"Using device: {device}")
+    logger.info(f"Using device: {device}")
 
     # Create test config
     config = create_test_config()
-    print("\nTest configuration:")
-    print(OmegaConf.to_yaml(config))
+    logger.info("\nTest configuration:")
+    logger.info("\n" + OmegaConf.to_yaml(config))
 
     # Initialize model
     model = DETR(config).to(device)
@@ -227,15 +260,16 @@ def main():
     try:
         # Run component tests
         test_transformer_input_shapes(model, device)
+        test_auxiliary_outputs(model, device)
         test_optimizer(config)
 
         # Run end-to-end tests
         test_end_to_end(config)
 
-        print("\nAll tests passed successfully!")
+        logger.info("\nAll tests passed successfully!")
 
     except Exception as e:
-        print(f"\nTest failed with error: {str(e)}")
+        logger.error(f"\nTest failed with error: {str(e)}")
         raise
 
 

@@ -12,6 +12,34 @@ from .box_ops import box_cxcywh_to_xyxy
 from .coco import build_dataset
 from .transforms import make_coco_transforms
 
+# Constants for common field names
+FIELD_ORIG_SIZE = "orig_size"
+FIELD_RESIZE_SCALE = "resize_scale"
+FIELD_PADDING = "padding"
+FIELD_UNPADDED_SIZE = "unpadded_size"
+FIELD_PADDED_SIZE = "padded_size"
+FIELD_PADDING_MASK = "padding_mask"
+FIELD_BOXES = "boxes"
+FIELD_LABELS = "labels"
+
+# Constants for data configuration
+CONFIG_DATA = "data"
+CONFIG_TRAINING = "training"
+CONFIG_DEBUG = "debug"
+CONFIG_AUGMENTATION = "augmentation"
+
+# Constants for normalization
+NORMALIZE_MEAN = [0.485, 0.456, 0.406]
+NORMALIZE_STD = [0.229, 0.224, 0.225]
+SEED = 43
+
+# Constants for augmentation
+DEFAULT_TRAIN_SCALES = [480, 512, 544, 576, 608, 640, 672, 704, 736, 768, 800]
+DEFAULT_VAL_SCALES = [800]
+DEFAULT_MAX_SIZE = 1333
+DEFAULT_MIN_SIZE = 384
+DEFAULT_CROP_SIZE = 600
+
 
 def create_padding_mask(batch_images: List[torch.Tensor]) -> torch.Tensor:
     """Create padding mask for a batch of images of different sizes."""
@@ -55,28 +83,28 @@ def collate_fn(
     padded_images = []
     for img, target in zip(images, targets):
         # Store original size before any transformations
-        if "orig_size" not in target:
-            target["orig_size"] = torch.tensor(list(img.shape[-2:]))
+        if FIELD_ORIG_SIZE not in target:
+            target[FIELD_ORIG_SIZE] = torch.tensor(list(img.shape[-2:]))
 
         # Calculate resize scale
-        orig_h, orig_w = target["orig_size"]
+        orig_h, orig_w = target[FIELD_ORIG_SIZE]
         curr_h, curr_w = img.shape[-2:]
         scale_h = curr_h / orig_h
         scale_w = curr_w / orig_w
 
         # Store resize scale for box coordinate adjustment
-        target["resize_scale"] = torch.tensor([scale_w, scale_h])
+        target[FIELD_RESIZE_SCALE] = torch.tensor([scale_w, scale_h])
 
         # Calculate padding sizes (only right and bottom)
         pad_h = max_size[-2] - curr_h
         pad_w = max_size[-1] - curr_w
 
         # Store padding info
-        target["padding"] = torch.tensor(
+        target[FIELD_PADDING] = torch.tensor(
             [0, pad_w, 0, pad_h]
         )  # left, right, top, bottom
-        target["unpadded_size"] = torch.tensor([curr_h, curr_w])
-        target["padded_size"] = torch.tensor([max_size[-2], max_size[-1]])
+        target[FIELD_UNPADDED_SIZE] = torch.tensor([curr_h, curr_w])
+        target[FIELD_PADDED_SIZE] = torch.tensor([max_size[-2], max_size[-1]])
 
         # Apply padding (left=0, right=pad_w, top=0, bottom=pad_h)
         padded_img = F.pad(img, (0, pad_w, 0, pad_h), value=0)
@@ -85,11 +113,11 @@ def collate_fn(
         # Create padding mask (True indicates padding)
         padding_mask = torch.ones((max_size[-2], max_size[-1]), dtype=torch.bool)
         padding_mask[:curr_h, :curr_w] = False
-        target["padding_mask"] = padding_mask
+        target[FIELD_PADDING_MASK] = padding_mask
 
         # Adjust box coordinates if they exist
-        if "boxes" in target and len(target["boxes"]):
-            boxes = target["boxes"]  # boxes are in cxcywh format and normalized
+        if FIELD_BOXES in target and len(target[FIELD_BOXES]):
+            boxes = target[FIELD_BOXES]  # boxes are in cxcywh format and normalized
 
             # First denormalize using original size
             boxes_denorm = boxes * torch.tensor(
@@ -107,7 +135,7 @@ def collate_fn(
                 dtype=torch.float32,
             )
 
-            target["boxes"] = boxes_norm
+            target[FIELD_BOXES] = boxes_norm
 
     # Stack images
     batched_images = torch.stack(padded_images)
@@ -138,24 +166,30 @@ class CocoDataset:
         self.config = config
 
         # Data paths
-        self.data_root_dir = config.data.data_root_dir
-        self.train_dir = config.data.train_dir
-        self.val_dir = config.data.val_dir
-        self.train_ann = config.data.train_ann
-        self.val_ann = config.data.val_ann
+        data_config = config[CONFIG_DATA]
+        self.data_root_dir = data_config.data_root_dir
+        self.train_dir = data_config.train_dir
+        self.val_dir = data_config.val_dir
+        self.train_ann = data_config.train_ann
+        self.val_ann = data_config.val_ann
 
         # DataLoader settings
-        self.batch_size = config.training.batch_size
-        self.num_workers = config.training.num_workers
-        self.pin_memory = config.data.pin_memory
-        self.shuffle_train = config.data.shuffle_train
-        self.shuffle_val = config.data.shuffle_val
+        training_config = config[CONFIG_TRAINING]
+        self.batch_size = training_config.batch_size
+        self.num_workers = training_config.num_workers
+        self.pin_memory = data_config.pin_memory
+        self.shuffle_train = data_config.shuffle_train
+        self.shuffle_val = data_config.shuffle_val
 
         # Debug settings
-        self.debug_mode = config.debug.enabled if hasattr(config, "debug") else False
-        self.debug_samples = (
-            config.debug.num_batches if hasattr(config, "debug") else 16
-        )
+        debug_config = getattr(config, CONFIG_DEBUG, None)
+        self.debug_mode = debug_config.enabled if debug_config else False
+        self.debug_samples = debug_config.num_batches if debug_config else 16
+
+        # Augmentation settings
+        aug_config = config[CONFIG_AUGMENTATION]
+        self.train_transforms = make_coco_transforms("train", aug_config)
+        self.val_transforms = make_coco_transforms("val", aug_config)
 
         # Initialize datasets
         self.train_dataset = None
@@ -164,65 +198,60 @@ class CocoDataset:
 
     def _setup_datasets(self):
         """Initialize train and validation datasets."""
+        common_args = {
+            "data_root_dir": self.data_root_dir,
+            "debug_mode": self.debug_mode,
+            "debug_samples": self.debug_samples,
+        }
+
         self.train_dataset = build_dataset(
             image_set="train",
-            data_root_dir=self.data_root_dir,
-            transforms=make_coco_transforms("train", self.config.augmentation),
+            transforms=self.train_transforms,
             train_dir=self.train_dir,
             train_ann=self.train_ann,
-            debug_mode=self.debug_mode,
-            debug_samples=self.debug_samples,
+            **common_args,
         )
 
         self.val_dataset = build_dataset(
             image_set="val",
-            data_root_dir=self.data_root_dir,
-            transforms=make_coco_transforms("val", self.config.augmentation),
+            transforms=self.val_transforms,
             val_dir=self.val_dir,
             val_ann=self.val_ann,
-            debug_mode=self.debug_mode,
-            debug_samples=self.debug_samples,
+            **common_args,
+        )
+
+    def _get_dataloader(self, dataset, shuffle: bool) -> DataLoader:
+        """Create and return a dataloader with common settings."""
+        return DataLoader(
+            dataset,
+            batch_size=self.batch_size,
+            shuffle=shuffle,
+            num_workers=self.num_workers,
+            collate_fn=collate_fn,
+            pin_memory=self.pin_memory,
         )
 
     def get_train_dataloader(self) -> DataLoader:
         """Create and return training dataloader."""
-        return DataLoader(
-            self.train_dataset,
-            batch_size=self.batch_size,
-            shuffle=self.shuffle_train,
-            num_workers=self.num_workers,
-            collate_fn=collate_fn,
-            pin_memory=self.pin_memory,
-        )
+        return self._get_dataloader(self.train_dataset, self.shuffle_train)
 
     def get_val_dataloader(self) -> DataLoader:
         """Create and return validation dataloader."""
-        return DataLoader(
-            self.val_dataset,
-            batch_size=self.batch_size,
-            shuffle=self.shuffle_val,
-            num_workers=self.num_workers,
-            collate_fn=collate_fn,
-            pin_memory=self.pin_memory,
-        )
+        return self._get_dataloader(self.val_dataset, self.shuffle_val)
 
     def get_test_dataloader(self) -> DataLoader:
         """Create and return test dataloader (same as validation for COCO)."""
         return self.get_val_dataloader()
 
 
-def plot_batch(images, targets, prefix: str, batch_idx: int, output_dir="viz_output"):
-    """
-    Plot a batch of images with their bounding boxes and save to files.
-    Visualizes boxes through resizing and padding transformations.
-
-    Args:
-        images: Tensor of shape [B, 3, H, W]
-        targets: List of dictionaries containing target annotations
-        prefix: Prefix for output filename
-        batch_idx: Which batch to visualize
-        output_dir: Directory to save visualization images
-    """
+def plot_batch(
+    images,
+    targets,
+    output_dir: str,
+    batch_idx: int = 0,
+    prefix: str = "aug",
+):
+    """Plot an image with its bounding boxes after augmentation."""
     # Create output directory if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)
 
@@ -230,206 +259,344 @@ def plot_batch(images, targets, prefix: str, batch_idx: int, output_dir="viz_out
     img = images[batch_idx].permute(1, 2, 0).cpu().numpy()
 
     # Denormalize image
-    mean = np.array([0.485, 0.456, 0.406])
-    std = np.array([0.229, 0.224, 0.225])
-    img = std * img + mean
+    img = NORMALIZE_STD * img + NORMALIZE_MEAN
     img = np.clip(img, 0, 1)
 
     # Create figure and axes
-    fig, ax = plt.subplots(1)
-    ax.imshow(img)
+    plt.figure(figsize=(12, 12))
+    plt.imshow(img)
 
     # Get target boxes and plot them
     target = targets[batch_idx]
-    boxes = target["boxes"].cpu()  # boxes are in cxcywh format and normalized
-    labels = target["labels"].cpu().numpy()
+    boxes = target[FIELD_BOXES].cpu()  # boxes are in cxcywh format and normalized
+    labels = target[FIELD_LABELS].cpu().numpy()
 
-    # Get padded size for denormalization
-    pad_h, pad_w = target["padded_size"]
+    # Get image size for denormalization
+    h, w = img.shape[:2]
 
-    # Convert from cxcywh to xyxy format
+    # Convert from cxcywh to xyxy format and denormalize
     boxes = box_cxcywh_to_xyxy(boxes)
-
-    # Denormalize boxes using padded size
-    boxes = boxes * torch.tensor([pad_w, pad_h, pad_w, pad_h], dtype=torch.float32)
+    boxes = boxes * torch.tensor([w, h, w, h], dtype=torch.float32)
     boxes = boxes.numpy()
 
-    # Plot each box
-    for box, label in zip(boxes, labels):
+    # Plot each box with different colors
+    colors = plt.cm.rainbow(np.linspace(0, 1, len(boxes)))
+    for box, label, color in zip(boxes, labels, colors):
         x0, y0, x1, y1 = box
         w_box = x1 - x0
         h_box = y1 - y0
 
         rect = plt.Rectangle(
-            (x0, y0), w_box, h_box, fill=False, color="red", linewidth=2
+            (x0, y0),
+            w_box,
+            h_box,
+            fill=False,
+            color=color,
+            linewidth=2,
+            linestyle="-",
         )
-        ax.add_patch(rect)
-        ax.text(
+        plt.gca().add_patch(rect)
+        plt.text(
             x0,
-            y0,
+            y0 - 5,
             f"Class {label}",
-            bbox=dict(facecolor="white", alpha=0.7),
+            color=color,
+            bbox=dict(facecolor="white", alpha=0.8, edgecolor=color),
+            fontsize=10,
         )
 
-    # Save the plot
-    plt.savefig(os.path.join(output_dir, f"{prefix}_batch_{batch_idx}.png"))
+    # Add image information
+    info_text = [
+        f"Image Size: {h}x{w}",
+        f"Num Boxes: {len(boxes)}",
+        f"Original Size: {target.get(FIELD_ORIG_SIZE, 'N/A').tolist()}",
+    ]
+    plt.text(
+        10,
+        30,
+        "\n".join(info_text),
+        color="white",
+        bbox=dict(facecolor="black", alpha=0.7),
+        fontsize=10,
+        verticalalignment="top",
+    )
+
+    plt.axis("off")
+    plt.savefig(
+        os.path.join(output_dir, f"{prefix}_batch_{batch_idx}.png"),
+        bbox_inches="tight",
+        dpi=150,
+    )
     plt.close()
 
 
-def main():
-    """Test data loading and visualize multiple batches."""
+def test_demo():
+    """Demo to visualize augmentations with bounding boxes."""
+
+    from omegaconf import DictConfig
     from utils.config import (
         AugmentationConfig,
+        CenterCropConfig,
+        DataConfig,
+        DebugConfig,
         HorizontalFlipConfig,
         NormalizeConfig,
+        RandomErasingConfig,
+        RandomPadConfig,
         RandomResizeConfig,
         TrainAugmentationConfig,
+        TrainingConfig,
         ValAugmentationConfig,
     )
 
-    # Create augmentation config
-    train_normalize = NormalizeConfig(
-        mean=[0.485, 0.456, 0.406],
-        std=[0.229, 0.224, 0.225],
-    )
+    # Create basic config for demo
+    config = {
+        "data": DataConfig(
+            data_root_dir="coco",
+            train_dir="train2017",
+            val_dir="val2017",
+            train_ann="annotations/instances_train2017.json",
+            val_ann="annotations/instances_val2017.json",
+            pin_memory=True,
+            shuffle_train=True,
+            shuffle_val=False,
+            persistent_workers=True,
+        ),
+        "training": TrainingConfig(
+            batch_size=2,
+            num_workers=0,
+            seed=SEED,
+            deterministic=True,
+            gradient_clip_val=0.1,
+            accumulate_grad_batches=1,
+            check_val_every_n_epoch=1,
+            precision=32,
+            detect_anomaly=False,
+            resume_from=None,
+            resume_mode="latest",
+        ),
+        "debug": DebugConfig(
+            enabled=False,
+            num_batches=2,
+        ),
+    }
+    config = DictConfig(config)
 
-    val_normalize = NormalizeConfig(
-        mean=[0.485, 0.456, 0.406],
-        std=[0.229, 0.224, 0.225],
-    )
+    # Create configs for each augmentation step
+    aug_configs = {
+        "1_horizontal_flip": AugmentationConfig(
+            scales=[480, 512, 544, 576, 608],
+            max_size=800,
+            train=TrainAugmentationConfig(
+                horizontal_flip=HorizontalFlipConfig(prob=0.5),
+                normalize=NormalizeConfig(mean=NORMALIZE_MEAN, std=NORMALIZE_STD),
+            ),
+            val=ValAugmentationConfig(
+                scales=[800],
+                max_size=1333,
+                normalize=NormalizeConfig(mean=NORMALIZE_MEAN, std=NORMALIZE_STD),
+            ),
+        ),
+        "2_random_resize": AugmentationConfig(
+            scales=[480, 512, 544, 576, 608],
+            max_size=800,
+            train=TrainAugmentationConfig(
+                random_resize=RandomResizeConfig(
+                    scales=[400, 500, 600], crop_size=[384, 600]
+                ),
+                normalize=NormalizeConfig(mean=NORMALIZE_MEAN, std=NORMALIZE_STD),
+            ),
+            val=ValAugmentationConfig(
+                scales=[800],
+                max_size=1333,
+                normalize=NormalizeConfig(mean=NORMALIZE_MEAN, std=NORMALIZE_STD),
+            ),
+        ),
+        "3_random_size_crop": AugmentationConfig(
+            scales=[480, 512, 544, 576, 608],
+            max_size=800,
+            train=TrainAugmentationConfig(
+                random_resize=RandomResizeConfig(
+                    scales=[400, 500, 600], crop_size=[384, 600]
+                ),
+                normalize=NormalizeConfig(mean=NORMALIZE_MEAN, std=NORMALIZE_STD),
+            ),
+            val=ValAugmentationConfig(
+                scales=[800],
+                max_size=1333,
+                normalize=NormalizeConfig(mean=NORMALIZE_MEAN, std=NORMALIZE_STD),
+            ),
+        ),
+        "4_random_pad": AugmentationConfig(
+            scales=[480, 512, 544, 576, 608],
+            max_size=800,
+            train=TrainAugmentationConfig(
+                random_pad=RandomPadConfig(max_pad=100),
+                normalize=NormalizeConfig(mean=NORMALIZE_MEAN, std=NORMALIZE_STD),
+            ),
+            val=ValAugmentationConfig(
+                scales=[800],
+                max_size=1333,
+                normalize=NormalizeConfig(mean=NORMALIZE_MEAN, std=NORMALIZE_STD),
+            ),
+        ),
+        "5_center_crop": AugmentationConfig(
+            scales=[480, 512, 544, 576, 608],
+            max_size=800,
+            train=TrainAugmentationConfig(
+                center_crop=CenterCropConfig(size=(384, 600)),
+                normalize=NormalizeConfig(mean=NORMALIZE_MEAN, std=NORMALIZE_STD),
+            ),
+            val=ValAugmentationConfig(
+                scales=[800],
+                max_size=1333,
+                center_crop=CenterCropConfig(size=(384, 600)),
+                normalize=NormalizeConfig(mean=NORMALIZE_MEAN, std=NORMALIZE_STD),
+            ),
+        ),
+        "6_random_erase": AugmentationConfig(
+            scales=[480, 512, 544, 576, 608],
+            max_size=800,
+            train=TrainAugmentationConfig(
+                random_erasing=RandomErasingConfig(
+                    prob=0.8,
+                    scale=(0.15, 0.5),
+                    ratio=(0.3, 2.0),
+                    value=0.5,
+                ),
+                normalize=NormalizeConfig(mean=NORMALIZE_MEAN, std=NORMALIZE_STD),
+            ),
+            val=ValAugmentationConfig(
+                scales=[800],
+                max_size=1333,
+                normalize=NormalizeConfig(mean=NORMALIZE_MEAN, std=NORMALIZE_STD),
+            ),
+        ),
+        "7_random_select": AugmentationConfig(
+            scales=[480, 512, 544, 576, 608],
+            max_size=800,
+            train=TrainAugmentationConfig(
+                random_resize=RandomResizeConfig(
+                    scales=[400, 500, 600], crop_size=[384, 600]
+                ),
+                normalize=NormalizeConfig(mean=NORMALIZE_MEAN, std=NORMALIZE_STD),
+            ),
+            val=ValAugmentationConfig(
+                scales=[800],
+                max_size=1333,
+                normalize=NormalizeConfig(mean=NORMALIZE_MEAN, std=NORMALIZE_STD),
+            ),
+        ),
+        "8_full_pipeline": AugmentationConfig(
+            scales=DEFAULT_TRAIN_SCALES,
+            max_size=DEFAULT_MAX_SIZE,
+            train=TrainAugmentationConfig(
+                horizontal_flip=HorizontalFlipConfig(prob=0.5),
+                random_pad=RandomPadConfig(max_pad=100),
+                random_resize=RandomResizeConfig(
+                    scales=[400, 500, 600], crop_size=[384, 600]
+                ),
+                center_crop=CenterCropConfig(size=(384, 600)),
+                random_erasing=RandomErasingConfig(
+                    prob=0.5,
+                    scale=(0.02, 0.33),
+                    ratio=(0.3, 3.3),
+                    value=0.0,
+                ),
+                normalize=NormalizeConfig(mean=NORMALIZE_MEAN, std=NORMALIZE_STD),
+            ),
+            val=ValAugmentationConfig(
+                scales=[800],
+                max_size=1333,
+                center_crop=CenterCropConfig(size=(384, 600)),
+                normalize=NormalizeConfig(mean=NORMALIZE_MEAN, std=NORMALIZE_STD),
+            ),
+        ),
+    }
 
-    horizontal_flip = HorizontalFlipConfig(
-        enabled=True,
-        prob=0.5,
-    )
+    # Process each augmentation configuration
+    for config_idx, (config_name, aug_config) in enumerate(aug_configs.items()):
+        print(f"\nTesting {config_name} configuration:")
 
-    random_resize = RandomResizeConfig(
-        enabled=True,
-        scales=[400, 500, 600],
-        crop_size=[384, 600],
-    )
-
-    train_aug = TrainAugmentationConfig(
-        horizontal_flip=horizontal_flip,
-        random_resize=random_resize,
-        normalize=train_normalize,
-    )
-
-    val_aug = ValAugmentationConfig(
-        scales=[800],
-        max_size=1333,
-        normalize=val_normalize,
-    )
-
-    aug_config = AugmentationConfig(
-        scales=[480, 512, 544, 576, 608, 640, 672, 704, 736, 768, 800],
-        max_size=1333,
-        train=train_aug,
-        val=val_aug,
-    )
-
-    # Initialize dataset with your COCO path
-    bs = 4
-    dataset = CocoDataset(
-        config={
-            "data": {
-                "data_root_dir": "/data/training_code/Pein/DETR/my_detr/coco",
-                "train_dir": "train2017",
-                "val_dir": "val2017",
-                "train_ann": "annotations/instances_train2017.json",
-                "val_ann": "annotations/instances_val2017.json",
-                "pin_memory": True,
-                "shuffle_train": True,
-                "shuffle_val": False,
-            },
-            "training": {
-                "batch_size": bs,
-                "num_workers": 4,
-            },
-            "augmentation": aug_config,
-        }
-    )
-    output_dir = "test_viz"
-
-    # Get train and val dataloaders
-    train_loader = dataset.get_train_dataloader()
-    val_loader = dataset.get_val_dataloader()
-
-    print("\nDataset sizes:")
-    print(f"Training set: {len(dataset.train_dataset)} images")
-    print(f"Validation set: {len(dataset.val_dataset)} images")
-
-    # Create output directories
-    os.makedirs(output_dir, exist_ok=True)
-
-    # Visualize multiple training batches
-    print("\nGenerating training set visualizations...")
-    for batch_num in range(bs + 1):  # Generate 5 batches of samples
         try:
-            train_batch = next(iter(train_loader))
-            images, targets = train_batch
+            # Update config with current augmentation config
+            config.augmentation = aug_config
 
-            print(f"\nTraining Batch {batch_num + 1}:")
-            print(f"Images shape: {images.shape}")
-            print(f"Number of targets: {len(targets)}")
-
-            # Visualize each image in the batch
-            for idx in range(images.shape[0]):
-                plot_batch(
-                    images,
-                    targets,
-                    "train",
-                    batch_idx=idx,
-                    output_dir=output_dir,
+            # Test both train and val transforms
+            for image_set in ["train", "val"]:
+                # Build dataset with current augmentation config
+                dataset = build_dataset(
+                    image_set=image_set,
+                    data_root_dir=config.data.data_root_dir,
+                    transforms=make_coco_transforms(image_set, config.augmentation),
+                    train_dir=config.data.train_dir,
+                    val_dir=config.data.val_dir,
+                    train_ann=config.data.train_ann,
+                    val_ann=config.data.val_ann,
+                    debug_mode=config.debug.enabled,
+                    debug_samples=config.debug.num_batches,
                 )
 
-                # Print target information for the first image of each batch
-                if idx == 0:
-                    print("\nFirst image targets:")
-                    for k, v in targets[idx].items():
-                        if isinstance(v, torch.Tensor):
-                            print(f"{k}: shape {v.shape}, dtype {v.dtype}")
-                        else:
-                            print(f"{k}: {v}")
-        except StopIteration:
-            print("Reached end of training dataset")
-            break
+                # Test multiple samples and multiple runs for each sample
+                num_samples = 3  # Number of different images to test
+                num_runs = (
+                    5 if image_set == "train" else 1
+                )  # Only one run for val since it's deterministic
 
-    # Visualize multiple validation batches
-    print("\nGenerating validation set visualizations...")
-    for batch_num in range(bs + 1):
-        try:
-            val_batch = next(iter(val_loader))
-            val_images, val_targets = val_batch
+                # Use different base indices for each configuration and validation
+                base_idx = config_idx * num_samples
+                if image_set == "val":
+                    base_idx += (
+                        len(aug_configs) * num_samples
+                    )  # Use later samples for validation
 
-            print(f"\nValidation Batch {batch_num + 1}:")
-            print(f"Images shape: {val_images.shape}")
-            print(f"Number of targets: {len(val_targets)}")
+                for sample_idx in range(num_samples):
+                    # Calculate actual dataset index
+                    dataset_idx = (base_idx + sample_idx) % len(dataset)
 
-            # Visualize each image in the batch
-            for idx in range(val_images.shape[0]):
-                plot_batch(
-                    val_images,
-                    val_targets,
-                    "val",
-                    batch_idx=idx,
-                    output_dir=output_dir,
+                    # Get a sample image
+                    base_img, base_target = dataset[dataset_idx]
+
+                    # Run augmentation multiple times on the same image
+                    for run_idx in range(num_runs):
+                        # Get a new augmented version
+                        img, target = dataset[dataset_idx]
+
+                        # Create a batch of one image
+                        images = img.unsqueeze(0)
+                        targets = [target]
+
+                        # Store original size
+                        if FIELD_ORIG_SIZE not in target:
+                            target[FIELD_ORIG_SIZE] = torch.tensor(list(img.shape[-2:]))
+
+                        # Create output directory for this configuration and sample
+                        config_output_dir = os.path.join(
+                            "augmentation_demo",
+                            f"{config_idx+1:02d}_{config_name}",
+                            image_set,
+                        )
+                        os.makedirs(config_output_dir, exist_ok=True)
+
+                        # Plot the sample
+                        plot_batch(
+                            images,
+                            targets,
+                            output_dir=config_output_dir,
+                            batch_idx=0,
+                            prefix=f"sample{sample_idx}_run{run_idx}",
+                        )
+
+                print(
+                    f"Saved {num_samples} samples with {num_runs} runs each for {image_set} set"
                 )
 
-                # Print target information for the first image of each batch
-                if idx == 0:
-                    print("\nFirst image targets:")
-                    for k, v in val_targets[idx].items():
-                        if isinstance(v, torch.Tensor):
-                            print(f"{k}: shape {v.shape}, dtype {v.dtype}")
-                        else:
-                            print(f"{k}: {v}")
-        except StopIteration:
-            print("Reached end of validation dataset")
-            break
+        except Exception as e:
+            print(f"Error testing {config_name} configuration: {str(e)}")
+            continue
 
-    print("\nVisualization complete!")
+    print("\nAugmentation demonstration complete!")
 
 
 if __name__ == "__main__":
-    main()
+    test_demo()

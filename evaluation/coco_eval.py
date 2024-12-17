@@ -16,6 +16,7 @@ from pycocotools.cocoeval import COCOeval
 from data.coco import get_coco_api_from_dataset
 
 
+# TODO: Test the Evaluator since the map are 0 all the time
 class CocoEvaluator:
     def __init__(self, coco_gt):
         """
@@ -159,48 +160,49 @@ class CocoEvaluator:
         Update evaluator with new predictions.
 
         Args:
-            predictions: Dict mapping image_id to dict with keys:
-                - boxes: tensor [N, 4] in [x_min, y_min, x_max, y_max] format
-                - scores: tensor [N]
-                - labels: tensor [N]
+            predictions: Dictionary mapping image IDs to prediction dictionaries
+                Each prediction dictionary contains:
+                - boxes: [N, 4] tensor of predicted boxes
+                - scores: [N] tensor of confidence scores
+                - labels: [N] tensor of predicted class labels
         """
-        if not predictions:
-            logging.info("No predictions received in update")
-            return
+        try:
+            if not predictions:
+                logging.warning("Received empty predictions dictionary")
+                return
 
-        # Add debugging
-        total_boxes = sum(len(p["boxes"]) for p in predictions.values())
-        logging.info(
-            f"Received {len(predictions)} images with total {total_boxes} boxes"
-        )
+            # Validate prediction shapes before conversion
+            for img_id, pred in predictions.items():
+                if not all(k in pred for k in ["boxes", "scores", "labels"]):
+                    raise ValueError(
+                        f"Missing required keys in predictions for image {img_id}"
+                    )
 
-        # Log some statistics about the predictions
-        if total_boxes > 0:
-            all_scores = torch.cat([p["scores"] for p in predictions.values()])
-            all_labels = torch.cat([p["labels"] for p in predictions.values()])
+                boxes, scores, labels = pred["boxes"], pred["scores"], pred["labels"]
+                if len(boxes) != len(scores) or len(boxes) != len(labels):
+                    raise ValueError(
+                        f"Shape mismatch in predictions for image {img_id}: "
+                        f"boxes: {boxes.shape}, scores: {scores.shape}, labels: {labels.shape}"
+                    )
 
-            # Get label counts and only show non-zero entries
-            label_counts = torch.bincount(all_labels.long())
-            non_zero_labels = torch.nonzero(label_counts).squeeze()
-            if len(non_zero_labels.shape) == 0:  # Handle single label case
-                non_zero_labels = non_zero_labels.unsqueeze(0)
+            coco_results = self.prepare_for_coco_detection(predictions)
+            logging.debug(f"Converted {len(coco_results)} predictions to COCO format")
 
-            label_info = [
-                f"class_{idx.item()}: {count.item()}"
-                for idx, count in zip(non_zero_labels, label_counts[non_zero_labels])
-            ]
+            self.predictions.extend(coco_results)
+            self.img_ids.extend(list(predictions.keys()))
 
-            logging.info(
-                f"Prediction stats - Score range: [{all_scores.min().item():.3f}, {all_scores.max().item():.3f}], "
-                f"mean: {all_scores.mean().item():.3f}, "
-                f"Active classes: {', '.join(label_info)}"
+        except (IndexError, ValueError) as e:
+            logging.error(
+                f"Critical error during prediction update: {str(e)}", exc_info=True
             )
-
-        coco_results = self.prepare_for_coco_detection(predictions)
-        logging.info(f"Converted {len(coco_results)} predictions to COCO format")
-
-        self.predictions.extend(coco_results)
-        self.img_ids.extend(list(predictions.keys()))
+            raise RuntimeError(
+                f"Evaluation failed due to invalid predictions: {str(e)}"
+            ) from e
+        except Exception as e:
+            logging.error(
+                f"Unexpected error during prediction update: {str(e)}", exc_info=True
+            )
+            raise RuntimeError(f"Evaluation failed: {str(e)}") from e
 
     def synchronize_between_processes(self, timeout_seconds: float = 5.0):
         """
@@ -402,12 +404,24 @@ class CocoEvaluator:
                 formatted_predictions = []
                 for pred in self.predictions:
                     try:
+                        # Validate prediction structure
+                        required_keys = ["image_id", "category_id", "bbox", "score"]
+                        if not all(k in pred for k in required_keys):
+                            raise ValueError(
+                                f"Missing required keys in prediction: {pred}"
+                            )
+
                         # Ensure bbox is a list
                         bbox = (
                             pred["bbox"]
                             if isinstance(pred["bbox"], list)
                             else list(pred["bbox"])
                         )
+
+                        # Validate bbox format
+                        if len(bbox) != 4:
+                            raise ValueError(f"Invalid bbox format: {bbox}")
+
                         formatted_pred = {
                             "image_id": int(pred["image_id"]),
                             "category_id": int(pred["category_id"]),
@@ -415,7 +429,7 @@ class CocoEvaluator:
                             "score": float(pred["score"]),
                         }
                         formatted_predictions.append(formatted_pred)
-                    except (TypeError, ValueError) as e:
+                    except (TypeError, ValueError, IndexError) as e:
                         logging.error(f"Failed to format prediction {pred}: {str(e)}")
                         continue
 
@@ -444,6 +458,16 @@ class CocoEvaluator:
             self.coco_eval.accumulate()
             logging.debug("COCO evaluation completed successfully")
 
+        except (IndexError, ValueError) as e:
+            logging.error(f"Critical error during evaluation: {str(e)}", exc_info=True)
+            # Clean up state
+            self._initialized_eval = False
+            self.coco_dt = None
+            self.coco_eval = None
+            # Raise the error to stop training
+            raise RuntimeError(
+                f"Evaluation failed due to invalid data: {str(e)}"
+            ) from e
         except Exception as e:
             logging.error(f"Critical error during evaluation: {str(e)}", exc_info=True)
             # Clean up state

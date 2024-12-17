@@ -1,803 +1,96 @@
-[2024-12-16 06:57:12,987][root][INFO] - Initializing process group: rank 1 of 2
-[2024-12-16 06:57:13,028][root][INFO] - Process group initialized successfully for rank 1
-[2024-12-16 06:57:27,005][root][INFO] - [Rank 1] Setting up evaluators (is_main_process=False)
-[2024-12-16 06:57:27,006][root][INFO] - [Rank 1] Train annotations: /data/training_code/Pein/DETR/my_detr/coco/annotations/instances_train2017.json
-[2024-12-16 06:57:27,006][root][INFO] - [Rank 1] Val annotations: /data/training_code/Pein/DETR/my_detr/coco/annotations/instances_val2017.json
-[2024-12-16 06:57:27,006][root][INFO] - [Rank 1] Loading training annotations...
-[2024-12-16 06:57:27,006][root][INFO] - Loading COCO annotations from /data/training_code/Pein/DETR/my_detr/coco/annotations/instances_train2017.json
-[2024-12-16 06:57:40,799][root][INFO] - Successfully loaded COCO annotations: 118287 images, 860001 annotations
-[2024-12-16 06:57:40,799][root][INFO] - Starting CocoEvaluator initialization
-[2024-12-16 06:58:13,379][root][INFO] - Successfully copied ground truth COCO object
-[2024-12-16 06:58:13,379][root][INFO] - CocoEvaluator initialization completed
-[2024-12-16 06:58:14,210][root][INFO] - [Rank 1] Training evaluator ready
-[2024-12-16 06:58:14,211][root][INFO] - [Rank 1] Loading validation annotations...
-[2024-12-16 06:58:14,211][root][INFO] - Loading COCO annotations from /data/training_code/Pein/DETR/my_detr/coco/annotations/instances_val2017.json
-[2024-12-16 06:58:14,724][root][INFO] - Successfully loaded COCO annotations: 5000 images, 36781 annotations
-[2024-12-16 06:58:14,724][root][INFO] - Starting CocoEvaluator initialization
-[2024-12-16 06:58:15,986][root][INFO] - Successfully copied ground truth COCO object
-[2024-12-16 06:58:15,986][root][INFO] - CocoEvaluator initialization completed
-[2024-12-16 06:58:16,027][root][INFO] - [Rank 1] Validation evaluator ready
-[2024-12-16 06:58:16,027][root][INFO] - [Rank 1] Waiting at evaluator initialization barrier
-[2024-12-16 06:58:16,027][root][DEBUG] - Waiting at barrier
-[2024-12-16 06:58:16,030][root][DEBUG] - Passed barrier
-[2024-12-16 06:58:16,030][root][INFO] - [Rank 1] Passed evaluator initialization barrier
-[2024-12-16 06:58:16,030][root][INFO] - [Rank 1] All evaluators initialized successfully
-[2024-12-16 06:58:16,030][root][INFO] - [Rank 1] Starting training loop
-[2024-12-16 06:58:16,030][root][INFO] - [Rank 1] Starting epoch 0
-[2024-12-16 06:58:16,030][root][INFO] - [Rank 1] Starting train_epoch()
-[2024-12-16 06:58:16,030][root][INFO] - [Rank 1] Starting train epoch
-[2024-12-16 06:58:16,031][root][INFO] - [Rank 1] Processing 2 batches out of 29572
-[2024-12-16 06:58:16,031][root][DEBUG] - [Rank 1] Synchronizing before batch processing
-[2024-12-16 06:58:16,759][root][DEBUG] - [Rank 1] Processing batch 0/2
-[2024-12-16 06:58:16,760][root][DEBUG] - [Rank 1] Processing train batch: images=torch.Size([2, 3, 768, 1118])
-[2024-12-16 06:58:16,762][root][DEBUG] - [Rank 1] Data moved to device cuda:1
-[2024-12-16 06:58:16,762][root][DEBUG] - [Rank 1] Starting forward pass
-[2024-12-16 06:58:17,408][root][DEBUG] - [Rank 1] Model forward pass completed
-[2024-12-16 06:58:17,458][root][DEBUG] - [Rank 1] Loss computation completed: 16.1967
-[2024-12-16 06:58:17,458][root][DEBUG] - [Rank 1] Batch 0 forward pass completed
-[2024-12-16 06:58:17,458][root][DEBUG] - [Rank 1] Starting backward pass for batch 0
-[2024-12-16 06:58:17,459][root][DEBUG] - [Rank 1] Clearing gradients
-[2024-12-16 06:58:17,459][root][DEBUG] - [Rank 1] Loss value before backward: 16.1966552734375
-[2024-12-16 06:58:17,459][root][DEBUG] - [Rank 1] Starting backward pass
-[2024-12-16 06:58:17,626][root][DEBUG] - [Rank 1] Backward pass completed
-[2024-12-16 06:58:17,638][root][DEBUG] - [Rank 1] Applying gradient clipping
-[2024-12-16 06:58:17,673][root][DEBUG] - [Rank 1] Gradient norm after clipping: 462.40106201171875
-[2024-12-16 06:58:17,673][root][DEBUG] - [Rank 1] Taking optimizer step
-[2024-12-16 06:58:17,714][root][DEBUG] - [Rank 1] Optimizer step completed
-[2024-12-16 06:58:17,715][root][DEBUG] - [Rank 1] Completed backward pass for batch 0
-[2024-12-16 06:58:17,715][root][DEBUG] - [Rank 1] Completed metrics logging for batch 0
-[2024-12-16 06:58:17,715][root][DEBUG] - [Rank 1] Synchronizing after batch 0
-[2024-12-16 06:58:17,716][root][DEBUG] - [Rank 1] Processing batch 1/2
-[2024-12-16 06:58:17,716][root][DEBUG] - [Rank 1] Processing train batch: images=torch.Size([2, 3, 913, 1196])
-[2024-12-16 06:58:17,718][root][DEBUG] - [Rank 1] Data moved to device cuda:1
-[2024-12-16 06:58:17,718][root][DEBUG] - [Rank 1] Starting forward pass
-[2024-12-16 06:58:17,756][root][DEBUG] - [Rank 1] Model forward pass completed
-[2024-12-16 06:58:17,760][root][DEBUG] - [Rank 1] Loss computation completed: 24.9792
-[2024-12-16 06:58:17,761][root][DEBUG] - [Rank 1] Batch 1 forward pass completed
-[2024-12-16 06:58:17,761][root][DEBUG] - [Rank 1] Starting backward pass for batch 1
-[2024-12-16 06:58:17,761][root][DEBUG] - [Rank 1] Clearing gradients
-[2024-12-16 06:58:17,762][root][DEBUG] - [Rank 1] Loss value before backward: 24.979156494140625
-[2024-12-16 06:58:17,762][root][DEBUG] - [Rank 1] Starting backward pass
-[2024-12-16 06:59:34,739][root][INFO] - Initializing process group: rank 1 of 2
-[2024-12-16 06:59:34,779][root][INFO] - Process group initialized successfully for rank 1
-[2024-12-16 06:59:48,423][root][INFO] - [Rank 1] Setting up evaluators (is_main_process=False)
-[2024-12-16 06:59:48,423][root][INFO] - [Rank 1] Train annotations: /data/training_code/Pein/DETR/my_detr/coco/annotations/instances_train2017.json
-[2024-12-16 06:59:48,423][root][INFO] - [Rank 1] Val annotations: /data/training_code/Pein/DETR/my_detr/coco/annotations/instances_val2017.json
-[2024-12-16 06:59:48,423][root][INFO] - [Rank 1] Loading training annotations...
-[2024-12-16 06:59:48,423][root][INFO] - Loading COCO annotations from /data/training_code/Pein/DETR/my_detr/coco/annotations/instances_train2017.json
-[2024-12-16 07:00:02,144][root][INFO] - Successfully loaded COCO annotations: 118287 images, 860001 annotations
-[2024-12-16 07:00:02,144][root][INFO] - Starting CocoEvaluator initialization
-[2024-12-16 07:00:25,591][root][INFO] - Setting up distributed training: local_rank=1, rank=1, world_size=2
-[2024-12-16 07:00:25,591][root][INFO] - Using device: cuda:1
-[2024-12-16 07:00:25,592][root][INFO] - Initializing process group: rank 1 of 2
-[2024-12-16 07:00:25,592][root][INFO] - Using backend: nccl, init_method: 127.0.0.1
-[2024-12-16 07:00:25,592][root][ERROR] - Failed to initialize process group for rank 1: No rendezvous handler for ://
-[2024-12-16 07:03:17,806][root][INFO] - Setting up distributed training: local_rank=1, rank=1, world_size=2
-[2024-12-16 07:03:17,807][root][INFO] - Using device: cuda:1
-[2024-12-16 07:03:17,807][root][INFO] - Initializing process group: rank 1 of 2
-[2024-12-16 07:03:17,807][root][INFO] - Using backend: nccl, init_method: tcp://127.0.0.1:29975
-[2024-12-16 07:03:17,807][root][INFO] - MASTER_ADDR: 127.0.0.1, MASTER_PORT: 29975
-[2024-12-16 07:03:17,810][root][INFO] - Process group initialized successfully for rank 1
-[2024-12-16 07:03:17,810][root][INFO] - Rank 1: Process group verification successful
-[2024-12-16 07:03:18,120][root][INFO] - Rank 1: CUDA device set to cuda:1
-[2024-12-16 07:03:31,548][root][INFO] - [Rank 1] Setting up evaluators (is_main_process=False)
-[2024-12-16 07:03:31,549][root][INFO] - [Rank 1] Train annotations: /data/training_code/Pein/DETR/my_detr/coco/annotations/instances_train2017.json
-[2024-12-16 07:03:31,549][root][INFO] - [Rank 1] Val annotations: /data/training_code/Pein/DETR/my_detr/coco/annotations/instances_val2017.json
-[2024-12-16 07:03:31,549][root][INFO] - [Rank 1] Loading training annotations...
-[2024-12-16 07:03:31,549][root][INFO] - Loading COCO annotations from /data/training_code/Pein/DETR/my_detr/coco/annotations/instances_train2017.json
-[2024-12-16 07:03:47,882][root][INFO] - Successfully loaded COCO annotations: 118287 images, 860001 annotations
-[2024-12-16 07:03:47,883][root][INFO] - Starting CocoEvaluator initialization
-[2024-12-16 07:04:21,340][root][INFO] - Successfully copied ground truth COCO object
-[2024-12-16 07:04:21,341][root][INFO] - CocoEvaluator initialization completed
-[2024-12-16 07:04:22,224][root][INFO] - [Rank 1] Training evaluator ready
-[2024-12-16 07:04:22,224][root][INFO] - [Rank 1] Loading validation annotations...
-[2024-12-16 07:04:22,224][root][INFO] - Loading COCO annotations from /data/training_code/Pein/DETR/my_detr/coco/annotations/instances_val2017.json
-[2024-12-16 07:04:22,750][root][INFO] - Successfully loaded COCO annotations: 5000 images, 36781 annotations
-[2024-12-16 07:04:22,750][root][INFO] - Starting CocoEvaluator initialization
-[2024-12-16 07:04:24,024][root][INFO] - Successfully copied ground truth COCO object
-[2024-12-16 07:04:24,024][root][INFO] - CocoEvaluator initialization completed
-[2024-12-16 07:04:24,066][root][INFO] - [Rank 1] Validation evaluator ready
-[2024-12-16 07:04:24,066][root][INFO] - [Rank 1] Waiting at evaluator initialization barrier
-[2024-12-16 07:04:24,066][root][DEBUG] - Waiting at barrier
-[2024-12-16 07:04:24,070][root][DEBUG] - Passed barrier
-[2024-12-16 07:04:24,070][root][INFO] - [Rank 1] Passed evaluator initialization barrier
-[2024-12-16 07:04:24,070][root][INFO] - [Rank 1] All evaluators initialized successfully
-[2024-12-16 07:04:24,070][root][INFO] - [Rank 1] Starting training loop
-[2024-12-16 07:04:24,071][root][INFO] - [Rank 1] Starting epoch 0
-[2024-12-16 07:04:24,071][root][INFO] - [Rank 1] Starting train_epoch()
-[2024-12-16 07:04:24,071][root][INFO] - [Rank 1] Starting train epoch
-[2024-12-16 07:04:24,072][root][INFO] - [Rank 1] Processing 2 batches out of 29572
-[2024-12-16 07:04:24,072][root][DEBUG] - [Rank 1] Synchronizing before batch processing
-[2024-12-16 07:04:24,817][root][DEBUG] - [Rank 1] Processing batch 0/2
-[2024-12-16 07:04:24,817][root][DEBUG] - [Rank 1] Processing train batch: images=torch.Size([2, 3, 768, 1118])
-[2024-12-16 07:04:24,820][root][DEBUG] - [Rank 1] Data moved to device cuda:1
-[2024-12-16 07:04:24,820][root][DEBUG] - [Rank 1] Starting forward pass
-[2024-12-16 07:04:25,429][root][DEBUG] - [Rank 1] Model forward pass completed
-[2024-12-16 07:04:25,480][root][DEBUG] - [Rank 1] Loss computation completed: 16.1967
-[2024-12-16 07:04:25,480][root][DEBUG] - [Rank 1] Batch 0 forward pass completed
-[2024-12-16 07:04:25,480][root][DEBUG] - [Rank 1] Starting backward pass for batch 0
-[2024-12-16 07:04:25,481][root][DEBUG] - [Rank 1] Clearing gradients
-[2024-12-16 07:04:25,481][root][DEBUG] - [Rank 1] Loss value before backward: 16.1966552734375
-[2024-12-16 07:04:25,481][root][DEBUG] - [Rank 1] Starting backward pass
-[2024-12-16 07:04:25,640][root][DEBUG] - [Rank 1] Backward pass completed
-[2024-12-16 07:04:25,652][root][DEBUG] - [Rank 1] Applying gradient clipping
-[2024-12-16 07:04:25,688][root][DEBUG] - [Rank 1] Gradient norm after clipping: 462.40106201171875
-[2024-12-16 07:04:25,688][root][DEBUG] - [Rank 1] Taking optimizer step
-[2024-12-16 07:04:25,730][root][DEBUG] - [Rank 1] Optimizer step completed
-[2024-12-16 07:04:25,730][root][DEBUG] - [Rank 1] Completed backward pass for batch 0
-[2024-12-16 07:04:25,730][root][DEBUG] - [Rank 1] Completed metrics logging for batch 0
-[2024-12-16 07:04:25,730][root][DEBUG] - [Rank 1] Synchronizing after batch 0
-[2024-12-16 07:04:25,731][root][DEBUG] - [Rank 1] Processing batch 1/2
-[2024-12-16 07:04:25,731][root][DEBUG] - [Rank 1] Processing train batch: images=torch.Size([2, 3, 913, 1196])
-[2024-12-16 07:04:25,733][root][DEBUG] - [Rank 1] Data moved to device cuda:1
-[2024-12-16 07:04:25,733][root][DEBUG] - [Rank 1] Starting forward pass
-[2024-12-16 07:04:25,772][root][DEBUG] - [Rank 1] Model forward pass completed
-[2024-12-16 07:04:25,776][root][DEBUG] - [Rank 1] Loss computation completed: 24.9792
-[2024-12-16 07:04:25,777][root][DEBUG] - [Rank 1] Batch 1 forward pass completed
-[2024-12-16 07:04:25,777][root][DEBUG] - [Rank 1] Starting backward pass for batch 1
-[2024-12-16 07:04:25,777][root][DEBUG] - [Rank 1] Clearing gradients
-[2024-12-16 07:04:25,778][root][DEBUG] - [Rank 1] Loss value before backward: 24.979156494140625
-[2024-12-16 07:04:25,778][root][DEBUG] - [Rank 1] Starting backward pass
-[2024-12-16 07:04:46,263][root][INFO] - Setting up distributed training: local_rank=0, rank=0, world_size=2
-[2024-12-16 07:04:46,263][root][INFO] - Using device: cuda:0
-[2024-12-16 07:04:46,263][root][INFO] - Initializing process group: rank 0 of 2
-[2024-12-16 07:04:46,263][root][INFO] - Using backend: nccl, init_method: tcp://127.0.0.1:29834
-[2024-12-16 07:04:46,264][root][INFO] - MASTER_ADDR: 127.0.0.1, MASTER_PORT: 29834
-[2024-12-16 07:04:46,302][root][INFO] - Process group initialized successfully for rank 0
-[2024-12-16 07:04:46,302][root][INFO] - Rank 0: Process group verification successful
-[2024-12-16 07:04:46,304][root][INFO] - Setting up distributed training: local_rank=1, rank=1, world_size=2
-[2024-12-16 07:04:46,305][root][INFO] - Using device: cuda:1
-[2024-12-16 07:04:46,305][root][INFO] - Initializing process group: rank 1 of 2
-[2024-12-16 07:04:46,305][root][INFO] - Using backend: nccl, init_method: tcp://127.0.0.1:29834
-[2024-12-16 07:04:46,305][root][INFO] - MASTER_ADDR: 127.0.0.1, MASTER_PORT: 29834
-[2024-12-16 07:04:46,308][root][INFO] - Process group initialized successfully for rank 1
-[2024-12-16 07:04:46,308][root][INFO] - Rank 1: Process group verification successful
-[2024-12-16 07:04:46,453][root][INFO] - Rank 0: CUDA device set to cuda:0
-[2024-12-16 07:04:46,453][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 07:04:46,655][root][INFO] - Rank 1: CUDA device set to cuda:1
-[2024-12-16 07:04:46,655][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 07:08:10,300][root][INFO] - Setting up distributed training: local_rank=1, rank=1, world_size=2
-[2024-12-16 07:08:10,301][root][INFO] - Using device: cuda:1
-[2024-12-16 07:08:10,301][root][INFO] - Initializing process group: rank 1 of 2
-[2024-12-16 07:08:10,301][root][INFO] - Using backend: nccl, init_method: tcp://127.0.0.1:29811
-[2024-12-16 07:08:10,301][root][INFO] - MASTER_ADDR: 127.0.0.1, MASTER_PORT: 29811
-[2024-12-16 07:08:10,303][root][INFO] - Process group initialized successfully for rank 1
-[2024-12-16 07:08:10,303][root][INFO] - Rank 1: Process group verification successful
-[2024-12-16 07:08:10,335][root][INFO] - Setting up distributed training: local_rank=0, rank=0, world_size=2
-[2024-12-16 07:08:10,336][root][INFO] - Using device: cuda:0
-[2024-12-16 07:08:10,336][root][INFO] - Initializing process group: rank 0 of 2
-[2024-12-16 07:08:10,337][root][INFO] - Using backend: nccl, init_method: tcp://127.0.0.1:29811
-[2024-12-16 07:08:10,337][root][INFO] - MASTER_ADDR: 127.0.0.1, MASTER_PORT: 29811
-[2024-12-16 07:08:10,376][root][INFO] - Process group initialized successfully for rank 0
-[2024-12-16 07:08:10,376][root][INFO] - Rank 0: Process group verification successful
-[2024-12-16 07:08:10,633][root][INFO] - Rank 0: CUDA device set to cuda:0
-[2024-12-16 07:08:10,634][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 07:08:10,665][root][INFO] - Rank 1: CUDA device set to cuda:1
-[2024-12-16 07:08:10,665][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 07:11:28,058][root][INFO] - Setting up distributed training: local_rank=1, rank=1, world_size=2
-[2024-12-16 07:11:28,058][root][INFO] - Using device: cuda:1
-[2024-12-16 07:11:28,058][root][INFO] - Initializing process group: rank 1 of 2
-[2024-12-16 07:11:28,059][root][INFO] - Using backend: nccl, init_method: tcp://127.0.0.1:29861
-[2024-12-16 07:11:28,059][root][INFO] - MASTER_ADDR: 127.0.0.1, MASTER_PORT: 29861
-[2024-12-16 07:11:28,097][root][INFO] - Process group initialized successfully for rank 1
-[2024-12-16 07:11:28,097][root][INFO] - Rank 1: Process group verification successful
-[2024-12-16 07:11:28,105][root][INFO] - Setting up distributed training: local_rank=0, rank=0, world_size=2
-[2024-12-16 07:11:28,106][root][INFO] - Using device: cuda:0
-[2024-12-16 07:11:28,106][root][INFO] - Initializing process group: rank 0 of 2
-[2024-12-16 07:11:28,106][root][INFO] - Using backend: nccl, init_method: tcp://127.0.0.1:29861
-[2024-12-16 07:11:28,106][root][INFO] - MASTER_ADDR: 127.0.0.1, MASTER_PORT: 29861
-[2024-12-16 07:11:28,109][root][INFO] - Process group initialized successfully for rank 0
-[2024-12-16 07:11:28,109][root][INFO] - Rank 0: Process group verification successful
-[2024-12-16 07:11:28,320][root][INFO] - Rank 0: CUDA device set to cuda:0
-[2024-12-16 07:11:28,320][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 07:11:28,429][root][INFO] - Rank 1: CUDA device set to cuda:1
-[2024-12-16 07:11:28,429][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 07:12:15,871][root][INFO] - Setting up distributed training: local_rank=1, rank=1, world_size=2
-[2024-12-16 07:12:15,871][root][INFO] - Using device: cuda:1
-[2024-12-16 07:12:15,871][root][INFO] - Initializing process group: rank 1 of 2
-[2024-12-16 07:12:15,872][root][INFO] - Using backend: nccl, init_method: tcp://127.0.0.1:29801
-[2024-12-16 07:12:15,872][root][INFO] - MASTER_ADDR: 127.0.0.1, MASTER_PORT: 29801
-[2024-12-16 07:12:15,909][root][INFO] - Process group initialized successfully for rank 1
-[2024-12-16 07:12:15,909][root][INFO] - Rank 1: Process group verification successful
-[2024-12-16 07:12:15,914][root][INFO] - Setting up distributed training: local_rank=0, rank=0, world_size=2
-[2024-12-16 07:12:15,914][root][INFO] - Using device: cuda:0
-[2024-12-16 07:12:15,915][root][INFO] - Initializing process group: rank 0 of 2
-[2024-12-16 07:12:15,915][root][INFO] - Using backend: nccl, init_method: tcp://127.0.0.1:29801
-[2024-12-16 07:12:15,915][root][INFO] - MASTER_ADDR: 127.0.0.1, MASTER_PORT: 29801
-[2024-12-16 07:12:15,917][root][INFO] - Process group initialized successfully for rank 0
-[2024-12-16 07:12:15,917][root][INFO] - Rank 0: Process group verification successful
-[2024-12-16 07:12:16,085][root][INFO] - Rank 0: CUDA device set to cuda:0
-[2024-12-16 07:12:16,085][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 07:12:16,251][root][INFO] - Rank 1: CUDA device set to cuda:1
-[2024-12-16 07:12:16,251][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 07:14:30,795][root][INFO] - Setting up distributed training: local_rank=0, rank=0, world_size=2
-[2024-12-16 07:14:30,795][root][INFO] - Using device: cuda:0
-[2024-12-16 07:14:30,795][root][INFO] - Initializing process group: rank 0 of 2
-[2024-12-16 07:14:30,795][root][INFO] - Using backend: nccl, init_method: tcp://127.0.0.1:29610
-[2024-12-16 07:14:30,796][root][INFO] - MASTER_ADDR: 127.0.0.1, MASTER_PORT: 29610
-[2024-12-16 07:14:30,829][root][INFO] - Setting up distributed training: local_rank=1, rank=1, world_size=2
-[2024-12-16 07:14:30,830][root][INFO] - Using device: cuda:1
-[2024-12-16 07:14:30,830][root][INFO] - Initializing process group: rank 1 of 2
-[2024-12-16 07:14:30,830][root][INFO] - Using backend: nccl, init_method: tcp://127.0.0.1:29610
-[2024-12-16 07:14:30,830][root][INFO] - MASTER_ADDR: 127.0.0.1, MASTER_PORT: 29610
-[2024-12-16 07:14:30,834][root][INFO] - Process group initialized successfully for rank 1
-[2024-12-16 07:14:30,834][root][INFO] - Rank 1: Process group verification successful
-[2024-12-16 07:14:30,835][root][INFO] - Process group initialized successfully for rank 0
-[2024-12-16 07:14:30,835][root][INFO] - Rank 0: Process group verification successful
-[2024-12-16 07:14:30,981][root][INFO] - Rank 0: CUDA device set to cuda:0
-[2024-12-16 07:14:30,981][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 07:14:31,138][root][INFO] - Rank 1: CUDA device set to cuda:1
-[2024-12-16 07:14:31,138][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 07:21:20,652][root][INFO] - Setting up distributed training: local_rank=0, rank=0, world_size=2
-[2024-12-16 07:21:20,653][root][INFO] - Using device: cuda:0
-[2024-12-16 07:21:20,653][root][INFO] - Initializing process group: rank 0 of 2
-[2024-12-16 07:21:20,653][root][INFO] - Using backend: nccl, init_method: tcp://127.0.0.1:29657
-[2024-12-16 07:21:20,653][root][INFO] - MASTER_ADDR: 127.0.0.1, MASTER_PORT: 29657
-[2024-12-16 07:21:20,690][root][INFO] - Process group initialized successfully for rank 0
-[2024-12-16 07:21:20,690][root][INFO] - Rank 0: Process group verification successful
-[2024-12-16 07:21:20,746][root][INFO] - Setting up distributed training: local_rank=1, rank=1, world_size=2
-[2024-12-16 07:21:20,746][root][INFO] - Using device: cuda:1
-[2024-12-16 07:21:20,746][root][INFO] - Initializing process group: rank 1 of 2
-[2024-12-16 07:21:20,747][root][INFO] - Using backend: nccl, init_method: tcp://127.0.0.1:29657
-[2024-12-16 07:21:20,747][root][INFO] - MASTER_ADDR: 127.0.0.1, MASTER_PORT: 29657
-[2024-12-16 07:21:20,749][root][INFO] - Process group initialized successfully for rank 1
-[2024-12-16 07:21:20,749][root][INFO] - Rank 1: Process group verification successful
-[2024-12-16 07:21:20,857][root][INFO] - Rank 0: CUDA device set to cuda:0
-[2024-12-16 07:21:20,857][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 07:21:21,083][root][INFO] - Rank 1: CUDA device set to cuda:1
-[2024-12-16 07:21:21,083][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 07:23:20,295][root][INFO] - Setting up distributed training: local_rank=1, rank=1, world_size=2
-[2024-12-16 07:23:20,296][root][INFO] - Using device: cuda:1
-[2024-12-16 07:23:20,296][root][INFO] - Initializing process group: rank 1 of 2
-[2024-12-16 07:23:20,296][root][INFO] - Using backend: nccl, init_method: tcp://127.0.0.1:29685
-[2024-12-16 07:23:20,296][root][INFO] - MASTER_ADDR: 127.0.0.1, MASTER_PORT: 29685
-[2024-12-16 07:23:20,319][root][INFO] - Setting up distributed training: local_rank=0, rank=0, world_size=2
-[2024-12-16 07:23:20,320][root][INFO] - Using device: cuda:0
-[2024-12-16 07:23:20,320][root][INFO] - Initializing process group: rank 0 of 2
-[2024-12-16 07:23:20,320][root][INFO] - Using backend: nccl, init_method: tcp://127.0.0.1:29685
-[2024-12-16 07:23:20,321][root][INFO] - MASTER_ADDR: 127.0.0.1, MASTER_PORT: 29685
-[2024-12-16 07:23:20,324][root][INFO] - Process group initialized successfully for rank 0
-[2024-12-16 07:23:20,324][root][INFO] - Rank 0: Process group verification successful
-[2024-12-16 07:23:20,333][root][INFO] - Process group initialized successfully for rank 1
-[2024-12-16 07:23:20,334][root][INFO] - Rank 1: Process group verification successful
-[2024-12-16 07:23:20,591][root][INFO] - Rank 0: CUDA device set to cuda:0
-[2024-12-16 07:23:20,591][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 07:23:20,695][root][INFO] - Rank 1: CUDA device set to cuda:1
-[2024-12-16 07:23:20,695][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 07:26:12,146][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 07:26:12,291][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 07:30:12,961][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 07:30:13,154][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 07:33:40,500][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 07:33:40,660][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 07:37:46,128][root][INFO] - Distributed setup complete: rank=0, world_size=1, device=cuda:0
-[2024-12-16 07:38:16,553][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 07:38:16,702][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 07:42:32,986][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 07:42:32,986][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 07:42:33,191][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 07:42:33,192][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 07:48:19,696][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 07:48:19,696][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 07:48:19,859][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 07:48:19,859][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 07:52:21,506][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 07:52:21,506][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 07:52:21,658][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 07:52:21,658][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 07:55:16,978][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 07:55:16,979][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 07:55:17,186][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 07:55:17,186][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 07:56:40,698][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 07:56:40,698][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 07:56:40,880][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 07:56:40,880][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 08:03:54,897][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 08:03:54,898][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 08:03:55,078][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 08:03:55,078][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 08:07:28,087][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 08:07:28,087][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 08:07:28,205][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 08:07:28,205][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 08:11:07,694][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 08:11:07,694][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 08:11:07,759][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 08:11:07,759][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 08:14:45,196][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 08:14:45,196][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 08:14:45,380][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 08:14:45,380][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 08:17:57,701][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 08:17:57,701][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 08:17:57,910][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 08:17:57,910][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 08:21:02,850][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 08:21:02,850][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 08:21:03,055][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 08:21:03,055][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 08:23:06,965][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 08:23:06,965][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 08:23:07,133][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 08:23:07,133][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 08:24:36,470][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 08:24:36,470][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 08:24:36,571][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 08:24:36,571][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 08:29:30,882][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 08:29:30,882][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 08:29:31,083][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 08:29:31,083][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 08:35:45,954][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 08:35:45,955][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 08:35:46,183][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 08:35:46,183][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 08:38:23,501][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 08:38:23,501][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 08:38:23,711][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 08:38:23,711][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 08:42:44,462][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 08:42:44,463][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 08:42:44,497][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 08:42:44,497][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 08:47:34,482][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 08:47:34,482][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 08:47:34,636][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 08:47:34,637][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 08:49:32,908][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 08:49:32,909][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 08:49:33,148][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 08:49:33,149][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 08:52:09,565][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 08:52:09,566][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 08:52:09,620][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 08:52:09,620][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 09:00:48,341][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 09:00:48,342][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 09:00:48,448][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 09:00:48,448][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 09:03:35,861][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 09:03:35,861][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 09:03:35,873][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 09:03:35,874][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 09:05:02,224][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 09:05:02,225][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 09:05:02,395][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 09:05:02,395][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 09:07:40,118][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 09:07:40,119][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 09:07:40,403][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 09:07:40,403][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 09:13:57,348][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 09:13:57,348][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 09:13:57,501][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 09:13:57,501][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 09:17:35,924][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 09:17:35,924][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 09:17:36,089][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 09:17:36,090][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 09:21:03,669][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 09:21:03,670][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 09:21:03,864][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 09:21:03,864][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 09:22:12,012][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 09:22:12,012][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 09:22:12,182][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 09:22:12,182][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 09:22:31,207][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 09:22:31,208][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 09:22:31,429][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 09:22:31,430][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 09:23:16,234][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 09:23:16,234][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 09:23:16,432][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 09:23:16,433][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 09:25:24,586][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 09:25:24,586][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 09:25:24,617][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 09:25:24,618][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 09:27:19,897][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 09:27:19,897][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 09:27:19,929][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 09:27:19,929][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 09:27:53,872][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 09:27:53,873][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 09:27:54,110][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 09:27:54,110][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 09:32:01,608][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 09:32:01,609][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 09:32:01,844][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 09:32:01,844][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 09:34:00,032][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 09:34:00,032][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 09:34:00,141][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 09:34:00,141][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 09:35:24,364][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 09:35:24,365][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 09:35:24,531][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 09:35:24,531][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 09:38:10,009][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 09:38:10,010][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 09:38:10,203][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 09:38:10,203][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 09:40:40,879][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 09:40:40,879][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 09:40:41,006][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 09:40:41,007][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 09:44:28,914][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 09:44:28,915][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 09:44:29,008][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 09:44:29,008][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 09:46:12,173][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 09:46:12,173][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 09:46:12,331][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 09:46:12,331][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 09:46:48,425][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 09:46:48,425][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 09:46:48,599][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 09:46:48,599][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 09:48:19,474][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 09:48:19,475][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 09:48:19,636][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 09:48:19,637][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 09:49:54,503][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 09:49:54,503][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 09:49:54,583][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 09:49:54,584][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 09:51:50,067][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 09:51:50,067][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 09:51:50,327][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 09:51:50,328][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 09:53:06,883][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 09:53:06,883][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 09:53:07,947][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 09:53:07,947][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 09:56:30,337][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 09:56:30,337][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 09:56:30,628][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 09:56:30,628][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 09:58:46,183][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 09:58:46,183][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 09:58:46,387][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 09:58:46,387][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 09:59:54,361][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 09:59:54,361][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 09:59:54,461][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 09:59:54,462][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 10:04:29,423][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 10:04:29,423][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 10:04:29,644][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 10:04:29,644][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 10:05:07,810][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 10:05:07,811][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 10:05:07,961][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 10:05:07,961][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 10:06:49,214][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 10:06:49,214][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 10:06:49,259][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 10:06:49,259][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 10:09:52,048][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 10:09:52,048][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 10:09:52,386][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 10:09:52,386][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 10:15:50,504][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 10:15:50,505][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 10:15:50,758][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 10:15:50,758][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 10:17:22,597][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 10:17:22,597][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 10:17:23,608][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 10:17:23,608][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 10:18:48,217][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 10:18:48,218][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 10:18:48,551][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 10:18:48,551][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 10:19:59,509][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 10:19:59,509][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 10:19:59,751][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 10:19:59,751][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 10:22:23,029][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 10:22:23,029][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 10:22:23,229][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 10:22:23,229][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 10:23:26,311][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 10:23:26,312][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 10:23:26,448][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 10:23:26,449][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 10:27:09,616][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 10:27:09,617][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 10:27:09,858][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 10:27:09,859][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 10:33:21,475][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 10:33:21,475][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 10:33:21,752][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 10:33:21,752][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 10:34:59,307][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 10:34:59,308][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 10:34:59,428][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 10:34:59,428][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 10:36:32,224][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 10:36:32,224][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 10:36:32,956][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 10:36:32,957][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 10:37:11,969][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 10:37:11,969][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 10:37:12,041][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 10:37:12,041][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 10:38:32,356][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 10:38:32,356][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 10:38:32,774][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 10:38:32,775][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 10:39:18,899][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 10:39:18,899][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 10:39:18,953][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 10:39:18,954][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 10:40:32,731][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 10:40:32,731][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 10:40:32,969][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 10:40:32,969][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 10:41:07,601][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 10:41:07,601][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 10:41:07,799][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 10:41:07,799][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 10:42:29,822][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 10:42:29,822][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 10:42:30,239][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 10:42:30,240][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 10:45:05,368][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 10:45:05,368][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 10:45:05,850][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 10:45:05,850][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 10:49:35,111][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 10:49:35,111][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 10:49:35,408][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 10:49:35,408][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 10:51:43,559][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 10:51:43,559][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 10:51:44,154][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 10:51:44,154][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 10:52:27,527][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 10:52:27,528][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 10:52:27,775][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 10:52:27,775][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 10:53:48,209][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 10:53:48,209][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 10:53:48,326][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 10:53:48,326][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 10:54:48,567][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 10:54:48,567][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 10:54:49,275][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 10:54:49,275][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 10:59:41,345][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 10:59:41,345][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 10:59:41,589][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 10:59:41,589][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 11:00:45,470][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 11:00:45,471][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 11:00:45,871][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 11:00:45,871][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 11:01:03,809][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 11:01:03,809][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 11:01:04,034][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 11:01:04,034][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 11:05:04,643][root][INFO] - Initialized distributed process group: rank=0, world_size=8
-[2024-12-16 11:05:04,643][root][INFO] - Distributed setup complete: rank=0, world_size=8, device=cuda:0
-[2024-12-16 11:05:04,660][root][ERROR] - Setup failed with error: Unsupported interpolation type eval
-    full_key: logging.experiment_name
-    object_type=dict
-[2024-12-16 11:05:04,789][root][INFO] - Initialized distributed process group: rank=6, world_size=8
-[2024-12-16 11:05:04,789][root][INFO] - Distributed setup complete: rank=6, world_size=8, device=cuda:6
-[2024-12-16 11:05:04,800][root][ERROR] - Setup failed with error: Unsupported interpolation type eval
-    full_key: logging.experiment_name
-    object_type=dict
-[2024-12-16 11:05:04,939][root][INFO] - Initialized distributed process group: rank=5, world_size=8
-[2024-12-16 11:05:04,940][root][INFO] - Distributed setup complete: rank=5, world_size=8, device=cuda:5
-[2024-12-16 11:05:04,954][root][ERROR] - Setup failed with error: Unsupported interpolation type eval
-    full_key: logging.experiment_name
-    object_type=dict
-[2024-12-16 11:07:53,717][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 11:07:53,718][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 11:07:53,734][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 11:07:53,734][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 11:08:39,112][root][INFO] - Initialized distributed process group: rank=1, world_size=8
-[2024-12-16 11:08:39,112][root][INFO] - Distributed setup complete: rank=1, world_size=8, device=cuda:1
-[2024-12-16 11:08:39,122][root][ERROR] - Setup failed with error: Unsupported interpolation type eval
-    full_key: logging.experiment_name
-    object_type=dict
-[2024-12-16 11:10:34,695][root][INFO] - Initialized distributed process group: rank=7, world_size=8
-[2024-12-16 11:10:34,695][root][INFO] - Distributed setup complete: rank=7, world_size=8, device=cuda:7
-[2024-12-16 11:10:35,139][root][INFO] - Initialized distributed process group: rank=0, world_size=8
-[2024-12-16 11:10:35,140][root][INFO] - Distributed setup complete: rank=0, world_size=8, device=cuda:0
-[2024-12-16 11:10:35,440][root][INFO] - Initialized distributed process group: rank=3, world_size=8
-[2024-12-16 11:10:35,440][root][INFO] - Distributed setup complete: rank=3, world_size=8, device=cuda:3
-[2024-12-16 11:10:36,349][root][INFO] - Initialized distributed process group: rank=6, world_size=8
-[2024-12-16 11:10:36,350][root][INFO] - Distributed setup complete: rank=6, world_size=8, device=cuda:6
-[2024-12-16 11:10:36,371][root][INFO] - Initialized distributed process group: rank=1, world_size=8
-[2024-12-16 11:10:36,371][root][INFO] - Distributed setup complete: rank=1, world_size=8, device=cuda:1
-[2024-12-16 11:10:36,373][root][INFO] - Initialized distributed process group: rank=2, world_size=8
-[2024-12-16 11:10:36,374][root][INFO] - Distributed setup complete: rank=2, world_size=8, device=cuda:2
-[2024-12-16 11:10:36,410][root][INFO] - Initialized distributed process group: rank=4, world_size=8
-[2024-12-16 11:10:36,411][root][INFO] - Distributed setup complete: rank=4, world_size=8, device=cuda:4
-[2024-12-16 11:10:36,415][root][INFO] - Initialized distributed process group: rank=5, world_size=8
-[2024-12-16 11:10:36,416][root][INFO] - Distributed setup complete: rank=5, world_size=8, device=cuda:5
-[2024-12-16 11:15:06,685][root][INFO] - Initialized distributed process group: rank=3, world_size=8
-[2024-12-16 11:15:06,685][root][INFO] - Distributed setup complete: rank=3, world_size=8, device=cuda:3
-[2024-12-16 11:15:06,700][root][INFO] - Initialized distributed process group: rank=0, world_size=8
-[2024-12-16 11:15:06,701][root][INFO] - Distributed setup complete: rank=0, world_size=8, device=cuda:0
-[2024-12-16 11:15:06,709][root][INFO] - Initialized distributed process group: rank=2, world_size=8
-[2024-12-16 11:15:06,709][root][INFO] - Distributed setup complete: rank=2, world_size=8, device=cuda:2
-[2024-12-16 11:15:06,719][root][INFO] - Initialized distributed process group: rank=6, world_size=8
-[2024-12-16 11:15:06,720][root][INFO] - Distributed setup complete: rank=6, world_size=8, device=cuda:6
-[2024-12-16 11:15:07,646][root][INFO] - Initialized distributed process group: rank=4, world_size=8
-[2024-12-16 11:15:07,647][root][INFO] - Distributed setup complete: rank=4, world_size=8, device=cuda:4
-[2024-12-16 11:15:07,653][root][INFO] - Initialized distributed process group: rank=7, world_size=8
-[2024-12-16 11:15:07,653][root][INFO] - Distributed setup complete: rank=7, world_size=8, device=cuda:7
-[2024-12-16 11:15:07,657][root][INFO] - Initialized distributed process group: rank=1, world_size=8
-[2024-12-16 11:15:07,658][root][INFO] - Distributed setup complete: rank=1, world_size=8, device=cuda:1
-[2024-12-16 11:15:07,661][root][INFO] - Initialized distributed process group: rank=5, world_size=8
-[2024-12-16 11:15:07,661][root][INFO] - Distributed setup complete: rank=5, world_size=8, device=cuda:5
-[2024-12-16 11:21:38,975][root][INFO] - Initialized distributed process group: rank=3, world_size=8
-[2024-12-16 11:21:38,976][root][INFO] - Distributed setup complete: rank=3, world_size=8, device=cuda:3
-[2024-12-16 11:21:39,451][root][INFO] - Initialized distributed process group: rank=4, world_size=8
-[2024-12-16 11:21:39,453][root][INFO] - Distributed setup complete: rank=4, world_size=8, device=cuda:4
-[2024-12-16 11:21:40,039][root][INFO] - Initialized distributed process group: rank=2, world_size=8
-[2024-12-16 11:21:40,039][root][INFO] - Distributed setup complete: rank=2, world_size=8, device=cuda:2
-[2024-12-16 11:21:40,070][root][INFO] - Initialized distributed process group: rank=1, world_size=8
-[2024-12-16 11:21:40,070][root][INFO] - Distributed setup complete: rank=1, world_size=8, device=cuda:1
-[2024-12-16 11:21:40,482][root][INFO] - Initialized distributed process group: rank=0, world_size=8
-[2024-12-16 11:21:40,482][root][INFO] - Distributed setup complete: rank=0, world_size=8, device=cuda:0
-[2024-12-16 11:21:40,640][root][INFO] - Initialized distributed process group: rank=7, world_size=8
-[2024-12-16 11:21:40,640][root][INFO] - Distributed setup complete: rank=7, world_size=8, device=cuda:7
-[2024-12-16 11:21:40,679][root][INFO] - Initialized distributed process group: rank=6, world_size=8
-[2024-12-16 11:21:40,679][root][INFO] - Distributed setup complete: rank=6, world_size=8, device=cuda:6
-[2024-12-16 11:21:40,743][root][INFO] - Initialized distributed process group: rank=5, world_size=8
-[2024-12-16 11:21:40,744][root][INFO] - Distributed setup complete: rank=5, world_size=8, device=cuda:5
-[2024-12-16 14:03:18,260][root][INFO] - Initialized distributed process group: rank=0, world_size=8
-[2024-12-16 14:03:18,260][root][INFO] - Distributed setup complete: rank=0, world_size=8, device=cuda:0
-[2024-12-16 14:03:19,759][root][INFO] - Initialized distributed process group: rank=1, world_size=8
-[2024-12-16 14:03:19,759][root][INFO] - Distributed setup complete: rank=1, world_size=8, device=cuda:1
-[2024-12-16 14:03:20,510][root][INFO] - Initialized distributed process group: rank=2, world_size=8
-[2024-12-16 14:03:20,511][root][INFO] - Distributed setup complete: rank=2, world_size=8, device=cuda:2
-[2024-12-16 14:03:20,573][root][INFO] - Initialized distributed process group: rank=4, world_size=8
-[2024-12-16 14:03:20,574][root][INFO] - Distributed setup complete: rank=4, world_size=8, device=cuda:4
-[2024-12-16 14:03:20,618][root][INFO] - Initialized distributed process group: rank=6, world_size=8
-[2024-12-16 14:03:20,618][root][INFO] - Distributed setup complete: rank=6, world_size=8, device=cuda:6
-[2024-12-16 14:03:21,364][root][INFO] - Initialized distributed process group: rank=5, world_size=8
-[2024-12-16 14:03:21,365][root][INFO] - Initialized distributed process group: rank=3, world_size=8
-[2024-12-16 14:03:21,365][root][INFO] - Distributed setup complete: rank=5, world_size=8, device=cuda:5
-[2024-12-16 14:03:21,365][root][INFO] - Distributed setup complete: rank=3, world_size=8, device=cuda:3
-[2024-12-16 14:03:21,396][root][INFO] - Initialized distributed process group: rank=7, world_size=8
-[2024-12-16 14:03:21,396][root][INFO] - Distributed setup complete: rank=7, world_size=8, device=cuda:7
-[2024-12-16 14:05:18,476][root][INFO] - Initialized distributed process group: rank=2, world_size=8
-[2024-12-16 14:05:18,476][root][INFO] - Distributed setup complete: rank=2, world_size=8, device=cuda:2
-[2024-12-16 14:05:19,131][root][INFO] - Initialized distributed process group: rank=0, world_size=8
-[2024-12-16 14:05:19,131][root][INFO] - Distributed setup complete: rank=0, world_size=8, device=cuda:0
-[2024-12-16 14:05:20,069][root][INFO] - Initialized distributed process group: rank=1, world_size=8
-[2024-12-16 14:05:20,069][root][INFO] - Distributed setup complete: rank=1, world_size=8, device=cuda:1
-[2024-12-16 14:05:20,394][root][INFO] - Initialized distributed process group: rank=7, world_size=8
-[2024-12-16 14:05:20,395][root][INFO] - Distributed setup complete: rank=7, world_size=8, device=cuda:7
-[2024-12-16 14:05:20,597][root][INFO] - Initialized distributed process group: rank=4, world_size=8
-[2024-12-16 14:05:20,598][root][INFO] - Distributed setup complete: rank=4, world_size=8, device=cuda:4
-[2024-12-16 14:05:20,665][root][INFO] - Initialized distributed process group: rank=5, world_size=8
-[2024-12-16 14:05:20,666][root][INFO] - Distributed setup complete: rank=5, world_size=8, device=cuda:5
-[2024-12-16 14:05:20,809][root][INFO] - Initialized distributed process group: rank=3, world_size=8
-[2024-12-16 14:05:20,809][root][INFO] - Distributed setup complete: rank=3, world_size=8, device=cuda:3
-[2024-12-16 14:05:20,865][root][INFO] - Initialized distributed process group: rank=6, world_size=8
-[2024-12-16 14:05:20,866][root][INFO] - Distributed setup complete: rank=6, world_size=8, device=cuda:6
-[2024-12-16 14:07:58,552][root][INFO] - Initialized distributed process group: rank=1, world_size=8
-[2024-12-16 14:07:58,552][root][INFO] - Distributed setup complete: rank=1, world_size=8, device=cuda:1
-[2024-12-16 14:07:58,633][root][INFO] - Initialized distributed process group: rank=3, world_size=8
-[2024-12-16 14:07:58,633][root][INFO] - Distributed setup complete: rank=3, world_size=8, device=cuda:3
-[2024-12-16 14:07:58,748][root][INFO] - Initialized distributed process group: rank=7, world_size=8
-[2024-12-16 14:07:58,749][root][INFO] - Distributed setup complete: rank=7, world_size=8, device=cuda:7
-[2024-12-16 14:07:58,798][root][INFO] - Initialized distributed process group: rank=0, world_size=8
-[2024-12-16 14:07:58,799][root][INFO] - Distributed setup complete: rank=0, world_size=8, device=cuda:0
-[2024-12-16 14:07:59,087][root][INFO] - Initialized distributed process group: rank=5, world_size=8
-[2024-12-16 14:07:59,088][root][INFO] - Distributed setup complete: rank=5, world_size=8, device=cuda:5
-[2024-12-16 14:07:59,292][root][INFO] - Initialized distributed process group: rank=2, world_size=8
-[2024-12-16 14:07:59,293][root][INFO] - Distributed setup complete: rank=2, world_size=8, device=cuda:2
-[2024-12-16 14:07:59,338][root][INFO] - Initialized distributed process group: rank=4, world_size=8
-[2024-12-16 14:07:59,338][root][INFO] - Distributed setup complete: rank=4, world_size=8, device=cuda:4
-[2024-12-16 14:07:59,363][root][INFO] - Initialized distributed process group: rank=6, world_size=8
-[2024-12-16 14:07:59,363][root][INFO] - Distributed setup complete: rank=6, world_size=8, device=cuda:6
-[2024-12-16 14:09:11,873][root][INFO] - Initialized distributed process group: rank=3, world_size=8
-[2024-12-16 14:09:11,873][root][INFO] - Distributed setup complete: rank=3, world_size=8, device=cuda:3
-[2024-12-16 14:09:13,208][root][INFO] - Initialized distributed process group: rank=2, world_size=8
-[2024-12-16 14:09:13,209][root][INFO] - Distributed setup complete: rank=2, world_size=8, device=cuda:2
-[2024-12-16 14:09:13,426][root][INFO] - Initialized distributed process group: rank=4, world_size=8
-[2024-12-16 14:09:13,426][root][INFO] - Distributed setup complete: rank=4, world_size=8, device=cuda:4
-[2024-12-16 14:09:13,524][root][INFO] - Initialized distributed process group: rank=0, world_size=8
-[2024-12-16 14:09:13,524][root][INFO] - Distributed setup complete: rank=0, world_size=8, device=cuda:0
-[2024-12-16 14:09:13,741][root][INFO] - Initialized distributed process group: rank=5, world_size=8
-[2024-12-16 14:09:13,742][root][INFO] - Distributed setup complete: rank=5, world_size=8, device=cuda:5
-[2024-12-16 14:09:14,116][root][INFO] - Initialized distributed process group: rank=6, world_size=8
-[2024-12-16 14:09:14,117][root][INFO] - Distributed setup complete: rank=6, world_size=8, device=cuda:6
-[2024-12-16 14:09:14,135][root][INFO] - Initialized distributed process group: rank=1, world_size=8
-[2024-12-16 14:09:14,135][root][INFO] - Distributed setup complete: rank=1, world_size=8, device=cuda:1
-[2024-12-16 14:09:14,139][root][INFO] - Initialized distributed process group: rank=7, world_size=8
-[2024-12-16 14:09:14,139][root][INFO] - Distributed setup complete: rank=7, world_size=8, device=cuda:7
-[2024-12-16 14:10:36,106][root][INFO] - Initialized distributed process group: rank=0, world_size=2
-[2024-12-16 14:10:36,106][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
-[2024-12-16 14:10:36,110][root][INFO] - Initialized distributed process group: rank=1, world_size=2
-[2024-12-16 14:10:36,110][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
-[2024-12-16 14:12:19,201][root][INFO] - Initialized distributed process group: rank=0, world_size=8
-[2024-12-16 14:12:19,201][root][INFO] - Distributed setup complete: rank=0, world_size=8, device=cuda:0
-[2024-12-16 14:12:19,492][root][INFO] - Initialized distributed process group: rank=2, world_size=8
-[2024-12-16 14:12:19,493][root][INFO] - Distributed setup complete: rank=2, world_size=8, device=cuda:2
-[2024-12-16 14:12:20,478][root][INFO] - Initialized distributed process group: rank=3, world_size=8
-[2024-12-16 14:12:20,479][root][INFO] - Distributed setup complete: rank=3, world_size=8, device=cuda:3
-[2024-12-16 14:12:20,612][root][INFO] - Initialized distributed process group: rank=1, world_size=8
-[2024-12-16 14:12:20,613][root][INFO] - Distributed setup complete: rank=1, world_size=8, device=cuda:1
-[2024-12-16 14:12:21,351][root][INFO] - Initialized distributed process group: rank=5, world_size=8
-[2024-12-16 14:12:21,351][root][INFO] - Distributed setup complete: rank=5, world_size=8, device=cuda:5
-[2024-12-16 14:12:21,404][root][INFO] - Initialized distributed process group: rank=6, world_size=8
-[2024-12-16 14:12:21,405][root][INFO] - Distributed setup complete: rank=6, world_size=8, device=cuda:6
-[2024-12-16 14:12:21,406][root][INFO] - Initialized distributed process group: rank=7, world_size=8
-[2024-12-16 14:12:21,406][root][INFO] - Distributed setup complete: rank=7, world_size=8, device=cuda:7
-[2024-12-16 14:12:21,412][root][INFO] - Initialized distributed process group: rank=4, world_size=8
-[2024-12-16 14:12:21,412][root][INFO] - Distributed setup complete: rank=4, world_size=8, device=cuda:4
-[2024-12-16 14:16:02,615][root][INFO] - Initialized distributed process group: rank=0, world_size=8
-[2024-12-16 14:16:02,615][root][INFO] - Distributed setup complete: rank=0, world_size=8, device=cuda:0
-[2024-12-16 14:16:03,085][root][INFO] - Initialized distributed process group: rank=1, world_size=8
-[2024-12-16 14:16:03,086][root][INFO] - Distributed setup complete: rank=1, world_size=8, device=cuda:1
-[2024-12-16 14:16:03,149][root][INFO] - Initialized distributed process group: rank=3, world_size=8
-[2024-12-16 14:16:03,149][root][INFO] - Distributed setup complete: rank=3, world_size=8, device=cuda:3
-[2024-12-16 14:16:03,988][root][INFO] - Initialized distributed process group: rank=4, world_size=8
-[2024-12-16 14:16:03,988][root][INFO] - Distributed setup complete: rank=4, world_size=8, device=cuda:4
-[2024-12-16 14:16:04,077][root][INFO] - Initialized distributed process group: rank=7, world_size=8
-[2024-12-16 14:16:04,078][root][INFO] - Distributed setup complete: rank=7, world_size=8, device=cuda:7
-[2024-12-16 14:16:04,090][root][INFO] - Initialized distributed process group: rank=6, world_size=8
-[2024-12-16 14:16:04,091][root][INFO] - Distributed setup complete: rank=6, world_size=8, device=cuda:6
-[2024-12-16 14:16:04,126][root][INFO] - Initialized distributed process group: rank=2, world_size=8
-[2024-12-16 14:16:04,127][root][INFO] - Distributed setup complete: rank=2, world_size=8, device=cuda:2
-[2024-12-16 14:16:04,151][root][INFO] - Initialized distributed process group: rank=5, world_size=8
-[2024-12-16 14:16:04,152][root][INFO] - Distributed setup complete: rank=5, world_size=8, device=cuda:5
-[2024-12-16 14:20:26,262][root][INFO] - Initialized distributed process group: rank=1, world_size=8
-[2024-12-16 14:20:26,263][root][INFO] - Distributed setup complete: rank=1, world_size=8, device=cuda:1
-[2024-12-16 14:20:26,269][root][INFO] - Initialized distributed process group: rank=4, world_size=8
-[2024-12-16 14:20:26,270][root][INFO] - Distributed setup complete: rank=4, world_size=8, device=cuda:4
-[2024-12-16 14:20:26,381][root][INFO] - Initialized distributed process group: rank=0, world_size=8
-[2024-12-16 14:20:26,382][root][INFO] - Distributed setup complete: rank=0, world_size=8, device=cuda:0
-[2024-12-16 14:20:27,085][root][INFO] - Initialized distributed process group: rank=5, world_size=8
-[2024-12-16 14:20:27,086][root][INFO] - Distributed setup complete: rank=5, world_size=8, device=cuda:5
-[2024-12-16 14:20:27,232][root][INFO] - Initialized distributed process group: rank=2, world_size=8
-[2024-12-16 14:20:27,233][root][INFO] - Distributed setup complete: rank=2, world_size=8, device=cuda:2
-[2024-12-16 14:20:27,250][root][INFO] - Initialized distributed process group: rank=7, world_size=8
-[2024-12-16 14:20:27,251][root][INFO] - Distributed setup complete: rank=7, world_size=8, device=cuda:7
-[2024-12-16 14:20:27,330][root][INFO] - Initialized distributed process group: rank=6, world_size=8
-[2024-12-16 14:20:27,330][root][INFO] - Distributed setup complete: rank=6, world_size=8, device=cuda:6
-[2024-12-16 14:20:27,332][root][INFO] - Initialized distributed process group: rank=3, world_size=8
-[2024-12-16 14:20:27,333][root][INFO] - Distributed setup complete: rank=3, world_size=8, device=cuda:3
-[2024-12-16 14:33:47,718][root][INFO] - Initialized distributed process group: rank=0, world_size=8
-[2024-12-16 14:33:47,718][root][INFO] - Distributed setup complete: rank=0, world_size=8, device=cuda:0
-[2024-12-16 14:33:49,221][root][INFO] - Initialized distributed process group: rank=5, world_size=8
-[2024-12-16 14:33:49,222][root][INFO] - Distributed setup complete: rank=5, world_size=8, device=cuda:5
-[2024-12-16 14:33:49,379][root][INFO] - Initialized distributed process group: rank=2, world_size=8
-[2024-12-16 14:33:49,379][root][INFO] - Distributed setup complete: rank=2, world_size=8, device=cuda:2
-[2024-12-16 14:33:50,120][root][INFO] - Initialized distributed process group: rank=4, world_size=8
-[2024-12-16 14:33:50,121][root][INFO] - Distributed setup complete: rank=4, world_size=8, device=cuda:4
-[2024-12-16 14:33:50,385][root][INFO] - Initialized distributed process group: rank=6, world_size=8
-[2024-12-16 14:33:50,385][root][INFO] - Distributed setup complete: rank=6, world_size=8, device=cuda:6
-[2024-12-16 14:33:50,385][root][INFO] - Initialized distributed process group: rank=1, world_size=8
-[2024-12-16 14:33:50,386][root][INFO] - Distributed setup complete: rank=1, world_size=8, device=cuda:1
-[2024-12-16 14:33:50,387][root][INFO] - Initialized distributed process group: rank=7, world_size=8
-[2024-12-16 14:33:50,388][root][INFO] - Distributed setup complete: rank=7, world_size=8, device=cuda:7
-[2024-12-16 14:33:50,391][root][INFO] - Initialized distributed process group: rank=3, world_size=8
-[2024-12-16 14:33:50,392][root][INFO] - Distributed setup complete: rank=3, world_size=8, device=cuda:3
-[2024-12-16 14:41:03,176][root][INFO] - Initialized distributed process group: rank=7, world_size=8
-[2024-12-16 14:41:03,177][root][INFO] - Distributed setup complete: rank=7, world_size=8, device=cuda:7
-[2024-12-16 14:41:03,244][root][INFO] - Initialized distributed process group: rank=1, world_size=8
-[2024-12-16 14:41:03,244][root][INFO] - Distributed setup complete: rank=1, world_size=8, device=cuda:1
-[2024-12-16 14:41:03,804][root][INFO] - Initialized distributed process group: rank=0, world_size=8
-[2024-12-16 14:41:03,805][root][INFO] - Distributed setup complete: rank=0, world_size=8, device=cuda:0
-[2024-12-16 14:41:04,234][root][INFO] - Initialized distributed process group: rank=4, world_size=8
-[2024-12-16 14:41:04,234][root][INFO] - Distributed setup complete: rank=4, world_size=8, device=cuda:4
-[2024-12-16 14:41:04,241][root][INFO] - Initialized distributed process group: rank=6, world_size=8
-[2024-12-16 14:41:04,242][root][INFO] - Distributed setup complete: rank=6, world_size=8, device=cuda:6
-[2024-12-16 14:41:04,247][root][INFO] - Initialized distributed process group: rank=3, world_size=8
-[2024-12-16 14:41:04,248][root][INFO] - Distributed setup complete: rank=3, world_size=8, device=cuda:3
-[2024-12-16 14:41:04,352][root][INFO] - Initialized distributed process group: rank=5, world_size=8
-[2024-12-16 14:41:04,352][root][INFO] - Distributed setup complete: rank=5, world_size=8, device=cuda:5
-[2024-12-16 14:41:04,356][root][INFO] - Initialized distributed process group: rank=2, world_size=8
-[2024-12-16 14:41:04,357][root][INFO] - Distributed setup complete: rank=2, world_size=8, device=cuda:2
+[2024-12-17 09:49:46,060][root][INFO] - Initialized distributed process group: rank=0, world_size=2
+[2024-12-17 09:49:46,060][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
+[2024-12-17 09:49:46,213][root][INFO] - Initialized distributed process group: rank=1, world_size=2
+[2024-12-17 09:49:46,213][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
+[2024-12-17 09:53:24,560][root][INFO] - Initialized distributed process group: rank=0, world_size=2
+[2024-12-17 09:53:24,560][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
+[2024-12-17 09:53:24,721][root][INFO] - Initialized distributed process group: rank=1, world_size=2
+[2024-12-17 09:53:24,721][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
+[2024-12-17 09:58:02,172][root][INFO] - Initialized distributed process group: rank=0, world_size=2
+[2024-12-17 09:58:02,172][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
+[2024-12-17 09:58:02,342][root][INFO] - Initialized distributed process group: rank=1, world_size=2
+[2024-12-17 09:58:02,342][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
+[2024-12-17 10:04:17,177][root][INFO] - Initialized distributed process group: rank=0, world_size=2
+[2024-12-17 10:04:17,177][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
+[2024-12-17 10:04:17,359][root][INFO] - Initialized distributed process group: rank=1, world_size=2
+[2024-12-17 10:04:17,359][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
+[2024-12-17 10:04:54,300][root][INFO] - Initialized distributed process group: rank=0, world_size=2
+[2024-12-17 10:04:54,300][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
+[2024-12-17 10:04:54,458][root][INFO] - Initialized distributed process group: rank=1, world_size=2
+[2024-12-17 10:04:54,458][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
+[2024-12-17 10:09:20,750][root][INFO] - Initialized distributed process group: rank=0, world_size=2
+[2024-12-17 10:09:20,750][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
+[2024-12-17 10:09:20,921][root][INFO] - Initialized distributed process group: rank=1, world_size=2
+[2024-12-17 10:09:20,921][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
+[2024-12-17 10:13:17,650][root][INFO] - Initialized distributed process group: rank=0, world_size=2
+[2024-12-17 10:13:17,650][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
+[2024-12-17 10:13:17,793][root][INFO] - Initialized distributed process group: rank=1, world_size=2
+[2024-12-17 10:13:17,793][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
+[2024-12-17 10:14:20,523][root][INFO] - Initialized distributed process group: rank=0, world_size=2
+[2024-12-17 10:14:20,523][root][INFO] - Distributed setup complete: rank=0, world_size=2, device=cuda:0
+[2024-12-17 10:14:20,688][root][INFO] - Initialized distributed process group: rank=1, world_size=2
+[2024-12-17 10:14:20,688][root][INFO] - Distributed setup complete: rank=1, world_size=2, device=cuda:1
+[2024-12-17 10:23:02,411][root][INFO] - Initialized distributed process group: rank=0, world_size=8
+[2024-12-17 10:23:02,412][root][INFO] - Distributed setup complete: rank=0, world_size=8, device=cuda:0
+[2024-12-17 10:23:03,298][root][INFO] - Initialized distributed process group: rank=5, world_size=8
+[2024-12-17 10:23:03,299][root][INFO] - Distributed setup complete: rank=5, world_size=8, device=cuda:5
+[2024-12-17 10:23:03,721][root][INFO] - Initialized distributed process group: rank=6, world_size=8
+[2024-12-17 10:23:03,722][root][INFO] - Distributed setup complete: rank=6, world_size=8, device=cuda:6
+[2024-12-17 10:23:03,804][root][INFO] - Initialized distributed process group: rank=1, world_size=8
+[2024-12-17 10:23:03,805][root][INFO] - Distributed setup complete: rank=1, world_size=8, device=cuda:1
+[2024-12-17 10:23:04,104][root][INFO] - Initialized distributed process group: rank=2, world_size=8
+[2024-12-17 10:23:04,105][root][INFO] - Distributed setup complete: rank=2, world_size=8, device=cuda:2
+[2024-12-17 10:23:04,138][root][INFO] - Initialized distributed process group: rank=3, world_size=8
+[2024-12-17 10:23:04,138][root][INFO] - Distributed setup complete: rank=3, world_size=8, device=cuda:3
+[2024-12-17 10:23:04,138][root][INFO] - Initialized distributed process group: rank=7, world_size=8
+[2024-12-17 10:23:04,139][root][INFO] - Distributed setup complete: rank=7, world_size=8, device=cuda:7
+[2024-12-17 10:23:04,161][root][INFO] - Initialized distributed process group: rank=4, world_size=8
+[2024-12-17 10:23:04,161][root][INFO] - Distributed setup complete: rank=4, world_size=8, device=cuda:4
+[2024-12-17 10:23:55,877][root][INFO] - Initialized distributed process group: rank=1, world_size=8
+[2024-12-17 10:23:55,877][root][INFO] - Distributed setup complete: rank=1, world_size=8, device=cuda:1
+[2024-12-17 10:23:55,929][root][INFO] - Initialized distributed process group: rank=0, world_size=8
+[2024-12-17 10:23:55,932][root][INFO] - Distributed setup complete: rank=0, world_size=8, device=cuda:0
+[2024-12-17 10:23:55,942][root][INFO] - Initialized distributed process group: rank=5, world_size=8
+[2024-12-17 10:23:55,943][root][INFO] - Distributed setup complete: rank=5, world_size=8, device=cuda:5
+[2024-12-17 10:23:56,417][root][INFO] - Initialized distributed process group: rank=2, world_size=8
+[2024-12-17 10:23:56,417][root][INFO] - Distributed setup complete: rank=2, world_size=8, device=cuda:2
+[2024-12-17 10:23:56,496][root][INFO] - Initialized distributed process group: rank=6, world_size=8
+[2024-12-17 10:23:56,496][root][INFO] - Distributed setup complete: rank=6, world_size=8, device=cuda:6
+[2024-12-17 10:23:56,567][root][INFO] - Initialized distributed process group: rank=4, world_size=8
+[2024-12-17 10:23:56,567][root][INFO] - Distributed setup complete: rank=4, world_size=8, device=cuda:4
+[2024-12-17 10:23:56,574][root][INFO] - Initialized distributed process group: rank=3, world_size=8
+[2024-12-17 10:23:56,574][root][INFO] - Distributed setup complete: rank=3, world_size=8, device=cuda:3
+[2024-12-17 10:23:56,594][root][INFO] - Initialized distributed process group: rank=7, world_size=8
+[2024-12-17 10:23:56,595][root][INFO] - Distributed setup complete: rank=7, world_size=8, device=cuda:7
+[2024-12-17 10:30:21,111][root][INFO] - Initialized distributed process group: rank=0, world_size=8
+[2024-12-17 10:30:21,112][root][INFO] - Distributed setup complete: rank=0, world_size=8, device=cuda:0
+[2024-12-17 10:30:21,287][root][INFO] - Initialized distributed process group: rank=2, world_size=8
+[2024-12-17 10:30:21,288][root][INFO] - Distributed setup complete: rank=2, world_size=8, device=cuda:2
+[2024-12-17 10:30:22,492][root][INFO] - Initialized distributed process group: rank=4, world_size=8
+[2024-12-17 10:30:22,493][root][INFO] - Distributed setup complete: rank=4, world_size=8, device=cuda:4
+[2024-12-17 10:30:22,496][root][INFO] - Initialized distributed process group: rank=1, world_size=8
+[2024-12-17 10:30:22,497][root][INFO] - Distributed setup complete: rank=1, world_size=8, device=cuda:1
+[2024-12-17 10:30:22,501][root][INFO] - Initialized distributed process group: rank=3, world_size=8
+[2024-12-17 10:30:22,503][root][INFO] - Distributed setup complete: rank=3, world_size=8, device=cuda:3
+[2024-12-17 10:30:22,531][root][INFO] - Initialized distributed process group: rank=7, world_size=8
+[2024-12-17 10:30:22,532][root][INFO] - Distributed setup complete: rank=7, world_size=8, device=cuda:7
+[2024-12-17 10:30:22,540][root][INFO] - Initialized distributed process group: rank=6, world_size=8
+[2024-12-17 10:30:22,541][root][INFO] - Distributed setup complete: rank=6, world_size=8, device=cuda:6
+[2024-12-17 10:30:22,543][root][INFO] - Initialized distributed process group: rank=5, world_size=8
+[2024-12-17 10:30:22,543][root][INFO] - Distributed setup complete: rank=5, world_size=8, device=cuda:5
+[2024-12-17 10:35:03,390][root][INFO] - Initialized distributed process group: rank=0, world_size=8
+[2024-12-17 10:35:03,391][root][INFO] - Distributed setup complete: rank=0, world_size=8, device=cuda:0
+[2024-12-17 10:35:04,133][root][INFO] - Initialized distributed process group: rank=5, world_size=8
+[2024-12-17 10:35:04,133][root][INFO] - Distributed setup complete: rank=5, world_size=8, device=cuda:5
+[2024-12-17 10:35:04,763][root][INFO] - Initialized distributed process group: rank=2, world_size=8
+[2024-12-17 10:35:04,764][root][INFO] - Distributed setup complete: rank=2, world_size=8, device=cuda:2
+[2024-12-17 10:35:04,943][root][INFO] - Initialized distributed process group: rank=4, world_size=8
+[2024-12-17 10:35:04,943][root][INFO] - Distributed setup complete: rank=4, world_size=8, device=cuda:4
+[2024-12-17 10:35:04,990][root][INFO] - Initialized distributed process group: rank=7, world_size=8
+[2024-12-17 10:35:04,990][root][INFO] - Distributed setup complete: rank=7, world_size=8, device=cuda:7
+[2024-12-17 10:35:05,025][root][INFO] - Initialized distributed process group: rank=1, world_size=8
+[2024-12-17 10:35:05,025][root][INFO] - Distributed setup complete: rank=1, world_size=8, device=cuda:1
+[2024-12-17 10:35:05,036][root][INFO] - Initialized distributed process group: rank=3, world_size=8
+[2024-12-17 10:35:05,036][root][INFO] - Distributed setup complete: rank=3, world_size=8, device=cuda:3
+[2024-12-17 10:35:05,037][root][INFO] - Initialized distributed process group: rank=6, world_size=8
+[2024-12-17 10:35:05,038][root][INFO] - Distributed setup complete: rank=6, world_size=8, device=cuda:6

@@ -2,7 +2,7 @@
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import List, Optional, Tuple, Union
 
 from omegaconf import MISSING, OmegaConf
 
@@ -61,6 +61,7 @@ class ModelConfig:
     """Configuration for DETR model architecture."""
 
     backbone_name: str = MISSING
+    use_aux_loss: bool = MISSING
     pretrained_backbone: bool = MISSING
     num_classes: int = MISSING
     hidden_dim: int = MISSING
@@ -133,35 +134,50 @@ class LossConfig:
 
 
 @dataclass
-class NormalizeConfig:
-    """Configuration for input normalization."""
-
-    mean: List[float] = MISSING
-    std: List[float] = MISSING
-
-
-@dataclass
 class HorizontalFlipConfig:
     """Configuration for horizontal flip augmentation."""
 
-    enabled: bool = MISSING
-    prob: float = MISSING
+    prob: float = 0.5
 
 
 @dataclass
 class RandomResizeConfig:
     """Configuration for random resize augmentation."""
 
-    enabled: bool = MISSING
-    scales: List[int] = MISSING
-    crop_size: List[int] = MISSING
+    scales: List[int] = field(default_factory=lambda: [400, 500, 600])
+    crop_size: List[int] = field(default_factory=lambda: [384, 600])
 
 
 @dataclass
-class ColorJitterConfig:
-    """Configuration for color jitter augmentation."""
+class RandomPadConfig:
+    """Configuration for random padding augmentation."""
 
-    enabled: bool = MISSING
+    max_pad: int = 32
+
+
+@dataclass
+class CenterCropConfig:
+    """Configuration for center crop augmentation."""
+
+    size: Tuple[int, int] = (384, 600)  # (height, width)
+
+
+@dataclass
+class RandomErasingConfig:
+    """Configuration for random erasing augmentation."""
+
+    prob: float = 0.5
+    scale: Tuple[float, float] = (0.02, 0.33)
+    ratio: Tuple[float, float] = (0.3, 3.3)
+    value: float = 0.0
+
+
+@dataclass
+class NormalizeConfig:
+    """Configuration for input normalization."""
+
+    mean: List[float] = field(default_factory=lambda: [0.485, 0.456, 0.406])
+    std: List[float] = field(default_factory=lambda: [0.229, 0.224, 0.225])
 
 
 @dataclass
@@ -170,6 +186,9 @@ class TrainAugmentationConfig:
 
     horizontal_flip: HorizontalFlipConfig = field(default_factory=HorizontalFlipConfig)
     random_resize: RandomResizeConfig = field(default_factory=RandomResizeConfig)
+    random_pad: RandomPadConfig = field(default_factory=RandomPadConfig)
+    center_crop: CenterCropConfig = field(default_factory=CenterCropConfig)
+    random_erasing: RandomErasingConfig = field(default_factory=RandomErasingConfig)
     normalize: NormalizeConfig = field(default_factory=NormalizeConfig)
 
 
@@ -177,19 +196,20 @@ class TrainAugmentationConfig:
 class ValAugmentationConfig:
     """Configuration for validation augmentations."""
 
-    scales: List[int] = MISSING
-    max_size: int = MISSING
+    scales: List[int] = field(default_factory=lambda: [800])
+    max_size: int = 1333
+    center_crop: CenterCropConfig = field(default_factory=CenterCropConfig)
     normalize: NormalizeConfig = field(default_factory=NormalizeConfig)
 
 
 @dataclass
 class AugmentationConfig:
-    """Configuration for data augmentation pipeline."""
+    """Configuration for data augmentation."""
 
-    scales: List[int] = MISSING
-    max_size: int = MISSING
-    min_size: int = MISSING
-    color_jitter: ColorJitterConfig = field(default_factory=ColorJitterConfig)
+    scales: List[int] = field(
+        default_factory=lambda: [480, 512, 544, 576, 608, 640, 672, 704, 736, 768, 800]
+    )
+    max_size: int = 1333
     train: TrainAugmentationConfig = field(default_factory=TrainAugmentationConfig)
     val: ValAugmentationConfig = field(default_factory=ValAugmentationConfig)
 

@@ -46,6 +46,7 @@ class DETR(nn.Module):
         self.hidden_dim = config.model.hidden_dim
         self.backbone_name = config.model.backbone_name
         self.pretrained_backbone = config.model.pretrained_backbone
+        self.use_aux_loss = config.model.use_aux_loss
 
         # Initialize backbone
         self.backbone = BackboneBase(
@@ -99,11 +100,22 @@ class DETR(nn.Module):
             if p.dim() > 1:
                 nn.init.xavier_uniform_(p)
 
-        # Initialize class prediction bias for better convergence
+        # Initialize class prediction bias
         bias_value = -math.log((1 - prior_prob) / prior_prob)
         self.class_embed.bias.data = torch.ones(self.num_classes + 1) * bias_value
-        # Set different bias for background class (last class)
         self.class_embed.bias.data[-1] = -bias_value  # Different bias for background
+
+    @torch.jit.unused
+    def _set_aux_loss(self, outputs_class, outputs_coord):
+        """
+        This is a workaround to make torchscript happy, as torchscript
+        doesn't support dictionary with non-homogeneous values, such
+        as a dict having both a Tensor and a list.
+        """
+        return [
+            {"pred_logits": a, "pred_boxes": b}
+            for a, b in zip(outputs_class[:-1], outputs_coord[:-1])
+        ]
 
     def forward(self, x: torch.Tensor) -> Dict[str, torch.Tensor]:
         """
@@ -116,6 +128,8 @@ class DETR(nn.Module):
             Dict[str, torch.Tensor]: Dictionary containing model outputs
                 - 'pred_logits': Class predictions [batch_size, num_queries, num_classes + 1]
                 - 'pred_boxes': Box predictions [batch_size, num_queries, 4] in (cx, cy, w, h) format
+                - 'aux_outputs': Optional, only returned when aux_loss is True. List of dictionaries
+                               containing the two above keys for each decoder layer.
         """
         # Extract features from the backbone
         features = self.backbone(x)
@@ -131,29 +145,30 @@ class DETR(nn.Module):
         pos_embed = (
             self.position_embedding(projected_features).flatten(2).permute(2, 0, 1)
         )
-        flattened_features = flattened_features + pos_embed
 
         # Pass through transformer
-        transformer_output = self.transformer(
+        # hs shape: [num_decoder_layers, batch_size, num_queries, hidden_dim]
+        hs = self.transformer(
             flattened_features,
             self.query_embed.weight.unsqueeze(1).repeat(1, x.shape[0], 1),
             pos_embed,
-        )
+        )[0]  # We only need the decoder outputs, not the memory
 
-        # Get outputs from transformer and reshape for prediction
-        hs = transformer_output[0]  # Shape: [num_queries, batch_size, hidden_dim]
-        hs = hs.transpose(0, 1)  # Shape: [batch_size, num_queries, hidden_dim]
+        # Get outputs from all decoder layers
+        outputs_class = self.class_embed(hs)  # [L, B, N, num_classes + 1]
+        outputs_coord = self.bbox_embed(hs).sigmoid()  # [L, B, N, 4]
 
-        # Predict classes and boxes
-        outputs_class = self.class_embed(
-            hs
-        )  # [batch_size, num_queries, num_classes + 1]
-        outputs_coord = self.bbox_embed(hs).sigmoid()  # [batch_size, num_queries, 4]
-
-        return {
-            "pred_logits": outputs_class,
-            "pred_boxes": outputs_coord,
+        # Last layer output is the main prediction
+        out = {
+            "pred_logits": outputs_class[-1],  # [B, N, num_classes + 1]
+            "pred_boxes": outputs_coord[-1],  # [B, N, 4]
         }
+
+        # Add auxiliary outputs from intermediate decoder layers
+        if self.use_aux_loss:
+            out["aux_outputs"] = self._set_aux_loss(outputs_class, outputs_coord)
+
+        return out
 
     def configure_optimizer(self, config):
         """Configure optimizer with settings from config."""

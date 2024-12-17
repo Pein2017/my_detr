@@ -287,6 +287,19 @@ class CocoDetection(torchvision.datasets.CocoDetection):
             self.coco = get_coco_api_from_dataset(ann_file, is_fake=False)
             self.ids = list(sorted(self.coco.imgs.keys()))
 
+            # Create category ID to continuous index mapping
+            cat_ids = sorted(self.coco.getCatIds())
+            self.cat_id_to_continuous_id = {
+                cat_id: idx for idx, cat_id in enumerate(cat_ids)
+            }
+
+            # Debug logging for category mapping
+            logging.info(f"Created category mapping with {len(cat_ids)} categories")
+            logging.info("Category ID mapping:")
+            for cat_id, idx in self.cat_id_to_continuous_id.items():
+                cat_info = self.coco.cats[cat_id]
+                logging.info(f"COCO ID {cat_id} ({cat_info['name']}) -> Model ID {idx}")
+
     def __getitem__(self, idx: int) -> Tuple[Image.Image, Dict]:
         """
         Get a single sample from the dataset.
@@ -299,7 +312,7 @@ class CocoDetection(torchvision.datasets.CocoDetection):
                 - image is a PIL Image
                 - target is a dict containing:
                     - boxes (Tensor[N, 4]): The ground-truth boxes in [x0, y0, x1, y1] format
-                    - labels (Tensor[N]): The class labels for each ground-truth box
+                    - labels (Tensor[N]): The class labels for each ground-truth box (0-based)
                     - image_id (Tensor[1]): The image ID
                     - area (Tensor[N]): The area of each box
                     - iscrowd (Tensor[N]): Whether the target is a crowd (1) or not (0)
@@ -329,6 +342,10 @@ class CocoDetection(torchvision.datasets.CocoDetection):
         areas = []
         iscrowds = []
 
+        # Debug: Track category ID mapping for this image
+        if not hasattr(self, "_logged_first_sample"):
+            logging.info(f"\nProcessing first sample (image_id: {image_id}):")
+
         # Process annotations
         for anno in target:
             # Skip crowd annotations
@@ -357,9 +374,38 @@ class CocoDetection(torchvision.datasets.CocoDetection):
                 continue
 
             boxes.append(bbox)
-            classes.append(anno["category_id"])
+
+            # Convert COCO category ID to continuous zero-based index
+            original_cat_id = anno["category_id"]
+            if hasattr(self, "cat_id_to_continuous_id"):
+                # For real COCO dataset
+                cat_id = self.cat_id_to_continuous_id[original_cat_id]
+
+                # Debug logging for first sample
+                if not hasattr(self, "_logged_first_sample"):
+                    cat_info = self.coco.cats[original_cat_id]
+                    logging.info(
+                        f"  Annotation: COCO ID {original_cat_id} ({cat_info['name']}) -> Model ID {cat_id}"
+                    )
+            else:
+                # For debug dataset (already zero-based)
+                cat_id = original_cat_id - 1  # Convert to 0-based index
+                if not hasattr(self, "_logged_first_sample"):
+                    logging.info(
+                        f"  Debug dataset: Category ID {original_cat_id} -> {cat_id}"
+                    )
+
+            classes.append(cat_id)
             areas.append(anno["area"])
             iscrowds.append(anno.get("iscrowd", 0))
+
+        # Mark that we've logged the first sample
+        if not hasattr(self, "_logged_first_sample"):
+            self._logged_first_sample = True
+            if classes:
+                logging.info(f"  Final class indices for this image: {classes}")
+            else:
+                logging.info("  No valid annotations in this image")
 
         # Create target dictionary
         target = {}

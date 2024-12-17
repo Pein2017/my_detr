@@ -167,6 +167,8 @@ class TransformerDecoder(nn.Module):
     def __init__(self, decoder_layer: TransformerDecoderLayer, num_layers: int):
         super().__init__()
         self.layers = nn.ModuleList([decoder_layer for _ in range(num_layers)])
+        self.num_layers = num_layers
+        self.norm = nn.LayerNorm(decoder_layer.self_attn.embed_dim)
 
     def forward(
         self,
@@ -181,10 +183,22 @@ class TransformerDecoder(nn.Module):
         - tgt, query_pos: [N, B, D]
         - memory, pos: [HW, B, D]
         - padding_mask: [B, HW]
+        Returns:
+        - output: [L, B, N, D] where L is the number of decoder layers
         """
+        output = tgt
+        intermediate = []
+
         for layer in self.layers:
-            tgt = layer(tgt, memory, query_pos, pos, padding_mask)
-        return tgt
+            output = layer(output, memory, query_pos, pos, padding_mask)
+            # Apply normalization and store intermediate output
+            normed_output = self.norm(output)
+            # Reshape from [N, B, D] to [B, N, D]
+            normed_output = normed_output.permute(1, 0, 2)
+            intermediate.append(normed_output)
+
+        # Stack intermediate outputs to get [L, B, N, D]
+        return torch.stack(intermediate)
 
 
 class Transformer(nn.Module):
